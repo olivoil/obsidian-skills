@@ -1,0 +1,7 @@
+interface:
+  display_name: "Transcribe Meeting"
+  short_description: "Transcribe a meeting recording into a structured meeting note."
+  default_prompt: "Use this skill to transcribe a meeting recording and write the result into the vault."
+
+policy:
+  allow_implicit_invocation: false

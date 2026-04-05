@@ -1,0 +1,7 @@
+interface:
+  display_name: "Weekly Rollup"
+  short_description: "Summarize one ISO week into a weekly Obsidian note."
+  default_prompt: "Use this skill to generate or update the weekly rollup note for this vault."
+
+policy:
+  allow_implicit_invocation: false

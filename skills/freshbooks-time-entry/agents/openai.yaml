@@ -1,0 +1,7 @@
+interface:
+  display_name: "FreshBooks Time Entry"
+  short_description: "Sync Intervals data from SQLite into FreshBooks."
+  default_prompt: "Use this skill to sync cached Intervals data into FreshBooks."
+
+policy:
+  allow_implicit_invocation: false

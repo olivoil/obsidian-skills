@@ -1,0 +1,7 @@
+interface:
+  display_name: "Session Rollup"
+  short_description: "Turn recent Engram memory into a coding note and daily-note link."
+  default_prompt: "Use this skill to summarize recent project work into the vault."
+
+policy:
+  allow_implicit_invocation: false

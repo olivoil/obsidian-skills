@@ -1,0 +1,7 @@
+interface:
+  display_name: "Refine Daily Note"
+  short_description: "Polish a daily note, improve links, and enrich vault context."
+  default_prompt: "Use this skill to refine the target daily note in this Obsidian vault."
+
+policy:
+  allow_implicit_invocation: false

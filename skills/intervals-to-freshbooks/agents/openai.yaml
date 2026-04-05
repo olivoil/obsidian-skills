@@ -1,0 +1,7 @@
+interface:
+  display_name: "Intervals to FreshBooks"
+  short_description: "Copy weekly Intervals entries into FreshBooks."
+  default_prompt: "Use this skill to sync a week of Intervals time into FreshBooks."
+
+policy:
+  allow_implicit_invocation: false
