@@ -20,6 +20,8 @@ printf 'sqlite-placeholder' > "$TARGET/.claude/time-entries.db"
 # installs
 [[ -L "$TARGET/.agents/skills/refine-daily-note" ]]
 [[ -L "$TARGET/.claude/skills/refine-daily-note" ]]
+[[ -L "$TARGET/.agents/skills/topic-pulse" ]]
+[[ -L "$TARGET/.claude/skills/topic-pulse" ]]
 
 # migration
 [[ -f "$TARGET/.cache/om/intervals-cache/project-mappings.md" ]]

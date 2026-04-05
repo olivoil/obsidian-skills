@@ -4,7 +4,7 @@ Cross-agent skills for maintaining my personal Obsidian vault.
 
 This repo is public. My vault is not.
 
-These skills are how I use agents like Claude Code and Codex to help maintain the vault I actually work out of: refining daily notes, generating weekly rollups, transcribing meetings, and reconciling time-tracking data with external systems.
+These skills are how I use agents like Claude Code and Codex to help maintain the vault I actually work out of: refining daily notes, generating weekly rollups, transcribing meetings, enriching topic notes, and reconciling time-tracking data with external systems.
 
 They are not meant to be a universal Obsidian framework. They encode *my* workflow and assumptions first, but I am publishing them because the overall pattern may still be useful to adapt.
 
@@ -49,7 +49,7 @@ If your vault uses different folder names or a different note model, expect to a
 ## Included skills
 
 ### `refine-daily-note`
-Improve a daily note by polishing writing, adding missing links, extracting longer sections when appropriate, and enriching related vault context.
+Improve a daily note by polishing writing, adding missing links, extracting longer sections when appropriate, and enriching related vault context from Slack and GitHub activity.
 
 ### `weekly-rollup`
 Generate a weekly note from the current ISO week by aggregating daily notes, linked meetings, coding sessions, decisions, and todo progress.
@@ -68,6 +68,9 @@ Copy a week of time entries from Intervals into FreshBooks.
 
 ### `freshbooks-time-entry`
 Sync Intervals data from local SQLite state into FreshBooks without re-reading everything from the browser.
+
+### `topic-pulse`
+Research recently active topics and update `Topics/` notes with fresh outside context, links, and compact summaries.
 
 ## Agent model
 
