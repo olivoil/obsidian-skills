@@ -51,8 +51,14 @@ install_one() {
   mkdir -p "$(dirname "$dest")"
 
   if [[ -L "$dest" ]] && [[ "$(readlink "$dest")" == "$src" ]]; then
-    echo "already installed: $dest -> $src"
-    return
+    if [[ "$MODE" == "symlink" ]]; then
+      echo "already installed: $dest -> $src"
+      return
+    fi
+    if [[ "$FORCE" -eq 0 ]]; then
+      echo "skipping existing symlink (use --force to replace with $MODE): $dest"
+      return
+    fi
   fi
 
   if [[ -e "$dest" || -L "$dest" ]]; then

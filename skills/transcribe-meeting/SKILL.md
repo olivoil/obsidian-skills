@@ -17,11 +17,18 @@ Recording modes:
 - **omarchy-only** — screen recording with no matching Rodecaster. Extract audio from MP4 for transcription. Upload original MP4 to YouTube.
 - **rodecaster-only** — Rodecaster recording with no matching screen recording. Upload MP3 to Google Drive only (existing behavior).
 
+Rodecaster note:
+- In my current setup, the Rodecaster Duo is usually connected in **data transfer mode**.
+- When already mounted, recordings typically appear under `/run/media/<user>/RodeCaster/RODECaster`.
+- If it is connected but not mounted yet, the discovery script should try to detect the block device by label and mount it automatically.
+
 ## Workflow
 
 ### Phase 0: Setup
 
-1. Run `obsidian vault info=path` to get the vault root.
+1. Determine the vault root.
+   - **Preferred**: if the Obsidian CLI is available and responsive, run `obsidian vault info=path` and use the returned path.
+   - **Fallback**: if the CLI is unavailable, the app is not running, or the command does not return the expected payload, treat the current repo root as the vault root and continue by reading files directly.
 2. Determine the target date: use the argument if a date is provided, otherwise use today.
 3. Determine context: if the user provides additional info (project name, participants, meeting topic), note it. Otherwise, these will be inferred from any surrounding daily note context or left generic.
 
@@ -41,9 +48,13 @@ If no explicit URL or file path was given:
 
 2. **Discover Rodecaster recordings**:
    ```bash
+   bash scripts/find-recordings.sh "{date}"
+   ```
+   If you want to give the script a preferred mounted location, you may optionally set:
+   ```bash
    OBSIDIAN_RODECASTER_MOUNT=/run/media/olivier/RodeCaster/RODECaster bash scripts/find-recordings.sh "{date}"
    ```
-   If `OBSIDIAN_RODECASTER_MOUNT` fails (directory not found), fall back without it to try auto-detect.
+   Treat `OBSIDIAN_RODECASTER_MOUNT` as a hint, not a hard requirement. If that path does not exist yet, the script should fall back to auto-detect and try to auto-mount the Rodecaster volume.
    Save the JSON output to a temp file (e.g., `/tmp/rodecaster-{date}.json`).
 
 3. **Match recordings** by time overlap:

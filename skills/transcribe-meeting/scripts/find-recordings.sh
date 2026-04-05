@@ -22,13 +22,17 @@ if ! date -d "$TARGET_DATE" +%Y-%m-%d >/dev/null 2>&1; then
 fi
 
 # --- Mount discovery ---
+MOUNT=""
 if [ -n "$OBSIDIAN_RODECASTER_MOUNT" ]; then
-    MOUNT="$OBSIDIAN_RODECASTER_MOUNT"
-    if [ ! -d "$MOUNT" ]; then
-        echo "Error: OBSIDIAN_RODECASTER_MOUNT directory not found: $MOUNT" >&2
-        exit 1
+    if [ -d "$OBSIDIAN_RODECASTER_MOUNT" ]; then
+        MOUNT="${OBSIDIAN_RODECASTER_MOUNT%/}"
+    else
+        echo "Warning: OBSIDIAN_RODECASTER_MOUNT directory not found: $OBSIDIAN_RODECASTER_MOUNT" >&2
+        echo "Warning: falling back to Rodecaster auto-detect and auto-mount." >&2
     fi
-else
+fi
+
+if [ -z "$MOUNT" ]; then
     # Check both SD card mount (via card reader) and Rodecaster transfer mode (via USB).
     # Use findmnt/lsblk for discovery — find /run/media/ fails in sandboxed environments
     # (e.g. Claude Code sandbox restricts /run/media access for find).
@@ -62,11 +66,11 @@ else
                 echo "Error: Failed to mount $RODE_DEV: $MOUNT_OUTPUT" >&2
                 exit 1
             }
-            MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | grep -oP 'at \K.*')
-            if [ -d "$MOUNT_POINT/RODECaster" ]; then
+            MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | sed -n 's/^Mounted .* at \(.*\)$/\1/p' | tail -n1)
+            if [ -n "$MOUNT_POINT" ] && [ -d "$MOUNT_POINT/RODECaster" ]; then
                 MOUNTS=("$MOUNT_POINT/RODECaster")
             else
-                echo "Error: Mounted $RODE_DEV at $MOUNT_POINT but no RODECaster directory found." >&2
+                echo "Error: Mounted $RODE_DEV but could not resolve the RODECaster directory from: $MOUNT_OUTPUT" >&2
                 exit 1
             fi
         fi
