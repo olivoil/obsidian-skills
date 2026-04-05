@@ -19,7 +19,7 @@ A typical week looks something like this:
 - Coding work is summarized into **coding notes** so it is easier to reconstruct what changed and why.
 - Projects, people, and topics are linked together as a lightweight knowledge graph.
 - At the end of the week, I generate a **weekly rollup** that summarizes time, meetings, decisions, and open work.
-- Some of that information also needs to be reconciled with systems like **Intervals** and **FreshBooks**.
+- Some of that information also needs to be reconciled with systems like **Intervals** and **FreshBooks**. I use Intervals to log work time and FreshBooks for billing/invoicing, so a few skills bridge the vault with those systems.
 
 The goal of these skills is not just to automate text editing. The goal is to help keep Obsidian accurate, navigable, and useful as a long-term knowledge base.
 
@@ -86,7 +86,7 @@ In practice, I usually invoke these skills explicitly:
 
 For Codex, each skill includes `agents/openai.yaml` metadata and disables implicit invocation, because I usually know exactly which skill I want and these skills often write to the vault or external systems.
 
-## Runtime state
+## Shared runtime state and mutable mappings
 
 These skills expect the consumer repo to hold shared state at:
 
@@ -102,9 +102,27 @@ These skills expect the consumer repo to hold shared state at:
 └── time-entries.db
 ```
 
-This is deliberate.
+This state is **not** part of the reusable skill source. It is local runtime data that belongs to the consumer vault repo.
 
-I want to be able to switch between Claude and Codex without losing cached mappings or local state.
+I keep it there for a few reasons:
+
+- I want to be able to switch between Claude and Codex without losing context
+- I do not want private or evolving mappings checked into the public skill repo
+- several workflows get better over time if they can reuse what they have already learned
+
+### What “mutable mappings” means
+
+Some of these skills depend on associations that are specific to my vault and my work. For example:
+
+- a GitHub repo usually maps to a specific client or project
+- a Slack channel often corresponds to a specific project
+- an Outlook calendar event may imply a particular project context
+- a person may have context that is useful when enriching notes
+- an Intervals project may need to map to a FreshBooks client/project combination
+
+Those mappings are **mutable** because they are not fixed forever. They evolve as my work changes, and the skills can read, extend, and reuse them over time.
+
+That is why the repo ships templates, but the live data belongs under `.cache/om/` in the consumer repo.
 
 ## Obsidian CLI notes
 
