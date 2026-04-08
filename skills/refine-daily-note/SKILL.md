@@ -102,32 +102,26 @@ If no Slack messages were found in Phase 1b, or Slack MCP tools were unavailable
 
 ### Phase 1d: GitHub Activity Scan
 
-**Always attempt this phase.** If `gh` is unavailable, not authenticated, or returns no useful data, skip gracefully with no error.
+**USE CAPABILITY (optional): read-github-activity**
+Fetch activity for the target date. If the capability returns `available: false`, skip this phase and Phase 1e silently.
 
-1. Run:
-   ```bash
-   bash scripts/fetch-github-activity.sh {date}
-   ```
-   This returns JSON for:
-   - PRs authored on the date
-   - PRs active/updated on the date
-   - PRs reviewed on the date
-   - event-level activity (pushes, comments, reviews, issue/PR actions)
-2. Build a repo→project correlation map using:
+Using the returned activity data:
+
+1. Build a repo→project correlation map using:
    - `.cache/om/intervals-cache/github-mappings.md`
    - project names already present in the day's time entries
    - explicit repo links already mentioned in the daily note
-3. Identify the day's meaningful GitHub work:
+2. Identify the day's meaningful GitHub work:
    - authored PRs
    - reviewed PRs
    - notable pushes or comment/review bursts
    - repos with concentrated activity even if the daily note only mentions them vaguely
-4. Improve weak note context when GitHub data clarifies it. Examples:
+3. Improve weak note context when GitHub data clarifies it. Examples:
    - `worked on OIDC stuff` → mention the PR title or repo involved
    - `reviewed PRs` → list the most important PRs/repositories reviewed
    - `pipeline work` → mention the repo and PR title when available
-5. Infer or extend repo→project mappings when the association is clear, then append new mappings to `.cache/om/intervals-cache/github-mappings.md`.
-6. Do **not** rewrite time-entry lines automatically. Use GitHub activity to enrich the prose sections of the daily note, not to mutate the structured time-entry block.
+4. Infer or extend repo→project mappings when the association is clear, then append new mappings to `.cache/om/intervals-cache/github-mappings.md`.
+5. Do **not** rewrite time-entry lines automatically. Use GitHub activity to enrich the prose sections of the daily note, not to mutate the structured time-entry block.
 
 ### Phase 1e: GitHub Activity Summary
 

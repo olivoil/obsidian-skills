@@ -43,17 +43,10 @@ Look for:
 
 #### Step 1: Fetch Activity
 
-**Run this command** (replace YYYY-MM-DD with the target date):
-```bash
-bash scripts/fetch-github-activity.sh YYYY-MM-DD
-```
+**USE CAPABILITY: read-github-activity**
+Fetch activity for the target date.
 
-This returns JSON with:
-- PRs authored (created or updated)
-- PRs reviewed
-- Events with timestamps (commits, reviews, comments)
-
-**IMPORTANT**: The script output already includes PR titles and body snippets in `prs_authored`, `prs_active`, and `prs_reviewed`. Do NOT make separate `gh pr view` calls — use the data already returned by the script.
+The capability returns structured JSON with PRs authored, PRs reviewed, and timestamped events. PR titles and body snippets are already included — do NOT make separate `gh pr view` calls.
 
 #### Step 2: Correlate with Notes
 
