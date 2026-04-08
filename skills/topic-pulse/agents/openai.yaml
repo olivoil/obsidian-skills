@@ -1,7 +1,7 @@
 interface:
   display_name: "Topic Pulse"
-  short_description: "Research recently active topics and update topic notes with fresh context."
-  default_prompt: "Use this skill to add a Pulse-style update to one or more topic notes in this vault."
+  short_description: "Deepen topic notes from recent vault activity with concept documentation and subtopics."
+  default_prompt: "Use this skill to deepen one or more topic notes in this vault by identifying what should be explained better, what subtopics deserve notes, and what fresh context is worth preserving."
 
 policy:
   allow_implicit_invocation: false
