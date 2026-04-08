@@ -242,23 +242,20 @@ Use the entity catalog to:
 
 ### Phase 2: Load Mappings
 
-1. **Read project cache**: `.cache/om/intervals-cache/project-mappings.md` (in the project root)
-2. **Read GitHub mappings cache**: `.cache/om/intervals-cache/github-mappings.md` (learned repo→project associations)
-3. **Read Outlook mappings cache**: `.cache/om/intervals-cache/outlook-mappings.md` (learned calendar→project associations)
-4. **Read defaults from `references/worktype-mappings.md` and shared state from `.cache/om/intervals-cache/people-context.md`**
+**USE CAPABILITY: resolve-mappings**
+Load mapping types: `project`, `github`, `outlook`, `people`.
+
+Use the loaded mappings to:
+- Resolve project→workType for each time entry (Phase 3)
+- Correlate GitHub repos to projects (from Phase 1.5 data)
+- Match Outlook calendar events to projects (from Phase 1.7 data)
+- Look up attendee→project associations from people context
 
 If shared cache files are missing, bootstrap them with this repo's install script before running the workflow.
 
-Output format: `Project | Module (if applicable) | Work Type | Hours | Description`
-
-**Module handling**: Some projects have a Module dropdown (e.g., Optimizely CMS Decoupling). Check `project-mappings.md` for listed modules. When building entries:
-- If the work matches a specific module, include `module: "Module Name"` in the entry
-- If no specific module applies, **omit the module field** — the fill script will automatically select "No Module"
-- The script detects the Module dropdown at runtime; projects without it are unaffected
-
 ### Phase 3: Validate Against Cache
 
-Check the project cache for work types:
+Using the mappings from Phase 2, check each time entry's project has cached work types:
 - If all projects have cached work types → skip browser inspection
 - If any project is NOT cached → inspect browser to discover its work types
 
@@ -320,43 +317,17 @@ This ensures future runs skip inspection for this project, saving time and token
 
 ### Phase 5.5: Update GitHub Mappings Cache
 
-When you discover a new repo→project association (from PR links in notes or inferred from context):
+When you discover a new repo→project association:
 
-1. Read the current cache: `.cache/om/intervals-cache/github-mappings.md`
-2. Add the mapping to the table:
-
-```markdown
-| owner/repo-name | Intervals Project Name |
-```
-
-3. Write the updated file back
-
-This helps future correlation work more accurately by remembering which repos belong to which projects.
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row.
 
 ### Phase 5.6: Update Outlook Mappings Cache
 
-When you discover a new calendar event→project association (from subject matching, attendee inference, or user confirmation):
+When you discover a new calendar event→project association:
 
-1. Read the current cache: `.cache/om/intervals-cache/outlook-mappings.md`
-2. Add the mapping to the appropriate table:
-
-For subject→project mappings:
-```markdown
-| Calendar Subject Pattern | Intervals Project | Work Type |
-|--------------------------|-------------------|-----------|
-| Technomic-EXSQ Weekly Touchbase | Ignite Application Development & Support | Meeting: Client Meeting - US |
-```
-
-For recurring meeting mappings:
-```markdown
-| Meeting Name | Intervals Project | Work Type |
-|-------------|-------------------|-----------|
-| Technomic Scrum | Ignite Application Development & Support | Meeting: Internal Stand Up - US |
-```
-
-3. Write the updated file back
-
-This helps future runs instantly map recurring meetings to the correct project and work type.
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 
 ### Phase 6: Verify
 

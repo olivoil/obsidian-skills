@@ -51,19 +51,13 @@ Copy weekly time entries from Intervals to FreshBooks.
 
 ### Phase 3: Map Entries
 
-For each Intervals entry, determine the FreshBooks destination:
-- **Client** is always required for invoicing (defaults to "EXSquared")
-- **Project** is optional - use when work is for a specific project
-- If unmapped, ask user for the FreshBooks mapping
-- Update `.cache/om/intervals-cache/freshbooks-mappings.md` with new mappings
+**USE CAPABILITY: resolve-mappings**
+Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `data_to_map`.
 
-**Mapping examples:**
-| Intervals Client | Intervals Project | FB Client | FB Project |
-|-----------------|-------------------|-----------|------------|
-| Technomic | Ignite App... | EXSquared | Technomic |
-| EWG - Neuron | Feature Enhancement | EXSquared | EWG |
-| EX Squared Services | Meeting | EXSquared | (none) |
-| EX Squared Services | Biz Dev / Sales | EXSquared | (none) |
+For each Intervals entry, the capability resolves the FreshBooks destination:
+- **Client** is always required for invoicing (defaults to "EXSquared")
+- **Project** is optional — use when work is for a specific project
+- For unmapped entries, ask user for the FreshBooks mapping and learn it via the capability
 
 ### Phase 4: Create FreshBooks Time Entries via API
 

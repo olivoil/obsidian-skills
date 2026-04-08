@@ -76,28 +76,12 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 
 ### Phase 1: Read Project Mappings
 
-Read the mapping file at `.cache/om/intervals-cache/freshbooks-mappings.md`.
+**USE CAPABILITY: resolve-mappings**
+Load mapping type: `freshbooks`.
 
-Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended like `(20250040)`).
+Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended).
 
-| Intervals Project (contains) | FB Project | FB Note | Has FB Project? |
-|-------------------------------|-----------|---------|-----------------|
-| Ignite Application Development | Technomic | Development | yes |
-| Optimizely CMS | K Hovnanian | Development | yes |
-| Drees Maintenance | Drees | Development | yes |
-| DHDC Pre Buyer | Drees | Development | yes |
-| EWG Feature Enhancement | EWG | Development | yes |
-| EWG App v3 | EWG | Development | yes |
-| Mattamy Homes | Mattamy Homes | Development | yes |
-| CDS Digital Product | SLB | Development | yes |
-| Monthly Maintenance Agreement | TeleDynamics | Development | yes |
-| YPO - ProductOps | YPO | Development | yes |
-| Meeting | (none) | Meetings | no (client-only) |
-| Biz Dev / Sales | (none) | Business Development | no (client-only) |
-| Training | (none) | Training | no (client-only) |
-| Recruiting | (none) | Recruiting | no (client-only) |
-
-**Client-only entries** (no FB project) use `--client EXSquared` without `--project`. In SQLite they are stored with project = "EXSquared".
+**Client-only entries** (no FB project — Meetings, Biz Dev, Training, Recruiting) use `--client EXSquared` without `--project`. In SQLite they are stored with project = "EXSquared".
 
 ### Phase 2: Query SQLite for Gaps
 
