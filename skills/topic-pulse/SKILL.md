@@ -27,10 +27,13 @@ For a small set of relevant topics, gather current high-signal context from the 
 
 ### Phase 1: Select candidate topics
 
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `topics` and `projects` types.
+
 Build a candidate list from:
 - explicit topic names named by the user
-- existing wikilinks to `Topics/` notes in recent notes
-- repeated unlinked topic phrases that appear important in recent work
+- existing wikilinks to `Topics/` notes in recent notes (cross-reference against the entity catalog)
+- repeated unlinked topic phrases that appear important in recent work — verify against the entity catalog using QMD before treating as new
 
 Then rank candidates by relevance. Prefer topics that are:
 - repeated across multiple notes

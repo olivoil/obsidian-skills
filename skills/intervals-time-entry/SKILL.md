@@ -237,6 +237,16 @@ This gap analysis helps:
 - Identify development blocks between meetings
 - Suggest time allocations for unaccounted gaps
 
+### Phase 1.8: Discover Vault Entities
+
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects` and `people` types.
+
+Use the entity catalog to:
+- Correlate GitHub repos to project names in Phase 1.5
+- Match calendar attendees to person notes in Phase 1.7
+- Validate project names before mapping resolution in Phase 2
+
 ### Phase 2: Load Mappings
 
 1. **Read project cache**: `.cache/om/intervals-cache/project-mappings.md` (in the project root)

@@ -107,6 +107,11 @@ If the input is a local file path, use it directly.
 
 Before transcription, gather participant names and project vocabulary to improve whisper accuracy and action item attribution. Run the three tracks below **in parallel** to minimize added time.
 
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects`, `people`, and `meetings` types.
+
+Use the people catalog to match participant names from screenshots (Track 1) to existing vault person notes. Use the project catalog to build the whisper prompt vocabulary.
+
 **Track 1: Screenshots (authoritative for participants)**
 
 Find screenshots taken during the meeting window:

@@ -22,6 +22,11 @@ Generate a weekly summary note from daily notes, aggregating time entries, meeti
 
 ### Phase 2: Collect Data
 
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects`, `meetings`, and `coding` types.
+
+Use the entity catalog to resolve wikilinks in daily notes to their correct paths when reading linked meeting and coding notes.
+
 Read all daily notes for the target week. Prefer Obsidian CLI reads when available, but fall back to direct filesystem reads whenever needed.
 
 For each day that has a note:
