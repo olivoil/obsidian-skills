@@ -48,6 +48,29 @@ If your vault uses different folder names or a different note model, expect to a
 
 ## Included skills
 
+The repo now distinguishes between two kinds of skills:
+
+- **Workflow skills** — user-facing outcomes that orchestrate multiple steps
+- **Capability skills** — smaller reusable actions that workflows reference via `**USE CAPABILITY:**`
+
+See [`docs/CAPABILITIES.md`](./docs/CAPABILITIES.md) for the current capability index and planned extraction map.
+
+### Capability skills
+
+These are the first extracted reusable capabilities:
+
+### `discover-vault-entities`
+Build a vault entity catalog (projects, people, topics, meetings, coding notes, tags) for matching, linking, and context resolution.
+
+### `write-vault-section`
+Create or update a named markdown section in a note with explicit replace/append semantics.
+
+### `read-github-activity`
+Fetch GitHub PR/review/commit activity for a date and return normalized structured data.
+
+### `resolve-mappings`
+Load, resolve, or learn mappings from `.cache/om/intervals-cache/`.
+
 ### `refine-daily-note`
 Improve a daily note by polishing writing, adding missing links, extracting longer sections when appropriate, and enriching related vault context from Slack and GitHub activity.
 

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Discover Vault Entities"
+  short_description: "Build a catalog of projects, people, topics, meetings, coding notes, and tags from the vault."
+  default_prompt: "Use this capability when a workflow needs the current catalog of vault entities for matching, linking, or context resolution."
+
+policy:
+  allow_implicit_invocation: false
+

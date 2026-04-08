@@ -1,5 +1,9 @@
 ---
 name: freshbooks-time-entry
+type: workflow
+uses:
+  - resolve-mappings
+  - write-vault-section
 description: Sync Intervals time entries from SQLite to FreshBooks. Faster than browser-based sync since it reads local data. Use when asked to sync time to FreshBooks, enter FreshBooks time, or fill FreshBooks from Intervals.
 ---
 
@@ -76,7 +80,10 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 
 ### Phase 1: Read Project Mappings
 
-Read the mapping file at `.cache/om/intervals-cache/freshbooks-mappings.md`.
+**USE CAPABILITY: resolve-mappings**
+Operation: `resolve`
+Load mapping type: `freshbooks`.
+Pass the candidate Intervals project names as `data_to_map`.
 
 Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended like `(20250040)`).
 
@@ -107,7 +114,7 @@ Build a lookup from Intervals project name to FreshBooks destination. Match usin
 4. Check if FreshBooks already has a matching row for that date + FB project + note
 5. Collect all unmatched rows as gaps
 
-**If an Intervals project name doesn't match any mapping**, flag it and ask the user. Update `.cache/om/intervals-cache/freshbooks-mappings.md` with the new mapping.
+**If an Intervals project name doesn't match any mapping**, flag it, ask the user, and then persist the confirmed mapping via `resolve-mappings` with `operation = learn`.
 
 **Multiple Intervals projects may map to the same FB project.** Sum their hours per date before comparing. For example, if Intervals has "Optimizely CMS Decoupling" (3h) and "Optimizely CMS Health Check" (1h) on the same day, that's 4h total for "K Hovnanian" in FreshBooks.
 
@@ -161,22 +168,23 @@ bash $SKILL/scripts/insert-freshbooks.sh $DB \
 
 ### Phase 6: Update Daily Notes
 
-For each date with new entries, append a `### FreshBooks` section to `$VAULT/Daily Notes/YYYY-MM-DD.md`:
+For each date with new entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| K Hovnanian | 5.0 | Development |
-| Technomic | 0.5 | Development |
-| **Total** | **8.0** | |
-```
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {fb_project} | {hours} | {note} |
+  | **Total** | **{sum}** | |
+  ```
+- **mode**: `replace_section`
+- **separator**: `------`
+- **create_if_missing**: true
 
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+Right-align Hours column. Add bold Total row.
 
 ### Phase 7: Refresh FreshBooks Browser
 
