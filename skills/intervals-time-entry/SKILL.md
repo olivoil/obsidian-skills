@@ -1,5 +1,6 @@
 ---
 name: intervals-time-entry
+type: workflow
 description: Fill Intervals Online time entries from daily notes with GitHub and Outlook calendar correlation. Use when asked to fill time entries, timesheets, or submit hours to Intervals. Requires a browser automation tool capable of evaluating JavaScript in page context, with Intervals open.
 ---
 

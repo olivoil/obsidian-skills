@@ -1,5 +1,6 @@
 ---
 name: topic-pulse
+type: workflow
 description: Research recently active topics from the vault and update topic notes with fresh context, links, and concise summaries. Use when you want recent external context added to Topics notes or want a Pulse-style update based on what you touched recently.
 ---
 

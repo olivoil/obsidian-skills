@@ -1,5 +1,6 @@
 ---
 name: intervals-to-freshbooks
+type: workflow
 description: Copy a week's worth of time entries from Intervals to FreshBooks. Use when asked to sync time entries between Intervals and FreshBooks.
 ---
 

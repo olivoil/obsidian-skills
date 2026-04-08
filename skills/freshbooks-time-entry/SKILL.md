@@ -1,5 +1,6 @@
 ---
 name: freshbooks-time-entry
+type: workflow
 description: Sync Intervals time entries from SQLite to FreshBooks. Faster than browser-based sync since it reads local data. Use when asked to sync time to FreshBooks, enter FreshBooks time, or fill FreshBooks from Intervals.
 ---
 

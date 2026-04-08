@@ -1,5 +1,6 @@
 ---
 name: refine-daily-note
+type: workflow
 description: Improve Obsidian daily notes — polish writing, add missing wikilinks, extract long sections into dedicated notes, suggest new vault entities, summarize Slack and GitHub activity, and enrich person notes from meetings. Use when asked to clean up a daily note, polish writing, add wikilinks, or enrich note context.
 ---
 

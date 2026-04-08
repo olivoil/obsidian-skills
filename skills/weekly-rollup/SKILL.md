@@ -1,5 +1,6 @@
 ---
 name: weekly-rollup
+type: workflow
 description: Generate a weekly summary from daily notes — time totals, meeting highlights, coding sessions, key decisions, and todo progress. Use when asked for a weekly summary from daily notes, meetings, and todos.
 ---
 

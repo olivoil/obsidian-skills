@@ -1,5 +1,6 @@
 ---
 name: session-rollup
+type: workflow
 description: Summarize recent work from Engram memory into an Obsidian coding note and link it from the daily note. Use when wrapping up a coding session or when asked to sync recent project work into the vault.
 ---
 
