@@ -95,16 +95,14 @@ Omit any empty section.
 
 ### 4. Link from the daily note
 
-1. Read the relevant daily note.
-2. Create it if missing.
-3. Insert or update a `### Coding Sessions` section.
-4. Add a bullet linking to the new coding note with the one-line summary.
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### Coding Sessions`
+- **content**: `- [[{date}--{repo-name}--{branch}]] - {one-line summary}`
+- **position_hint**: `end`
+- **create_if_missing**: true
 
-Preferred bullet format:
-
-```markdown
-- [[{date}--{repo-name}--{branch}]] - {one-line summary}
-```
+If the section already has entries from other sessions today, append the new bullet to the existing content rather than replacing.
 
 ### 5. Confirm
 

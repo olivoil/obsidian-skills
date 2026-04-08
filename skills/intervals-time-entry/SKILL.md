@@ -371,47 +371,20 @@ Take screenshot to confirm entries are correct.
 
 ### Phase 7: Write Time Entry Table to Daily Note
 
-After verification, write the finalized entries back to the Obsidian daily note as a permanent record.
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### Intervals`
+- **content**: the markdown table built from ENTRIES data:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {project} | {hours} | {description} |
+  | **Total** | **{sum}** | |
+  ```
+- **position_hint**: `before:### Coding Sessions` (fall back to `after:### Done today`, then `end`)
+- **separator**: `------`
 
-#### Step 1: Resolve Vault Path
-
-Read `$OBSIDIAN_VAULT_PATH` from the environment. The daily note is at:
-```
-$OBSIDIAN_VAULT_PATH/Daily Notes/YYYY-MM-DD.md
-```
-
-#### Step 2: Read the Daily Note
-
-Read the daily note file to find the insertion point.
-
-#### Step 3: Insert or Replace the Intervals Section
-
-Look for an existing `### Intervals` section:
-- **If found**: Replace the entire section (from `### Intervals` to the next `###` or `---` or end of file) with the updated table
-- **If not found**: Insert the section using this priority:
-  1. Before `### Coding Sessions` if it exists
-  2. After `### Open todos` (before the next `###` or `---`)
-  3. After `### Done today` if `### Open todos` doesn't exist
-  4. At the end of the note if none of the above exist
-
-#### Step 4: Write the Table
-
-Format as a markdown table with a horizontal rule before it:
-
-```markdown
-------
-### Intervals
-| Project | Hours | Description |
-|---------|------:|-------------|
-| Ignite Application Development & Support | 2 | Weekly touchbase with Technomic |
-| EWG Feature Enhancement Addendum | 3.5 | Add pagination endpoint (PR #574) |
-| **Total** | **5.5** | |
-```
-
-- Use the same ENTRIES data that was sent to `fill-entries.js`
-- Right-align the Hours column
-- Add a bold **Total** row summing all hours
-- The `------` separator goes before `### Intervals` to visually separate it from the section above
+Use the same ENTRIES data that was sent to `fill-entries.js`. Right-align Hours column. Add bold Total row.
 
 ### Phase 8: Insert into SQLite Database
 

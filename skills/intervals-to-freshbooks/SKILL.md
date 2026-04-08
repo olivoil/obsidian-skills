@@ -152,21 +152,14 @@ SQL
 
 #### Step 3: Append FreshBooks Section to Daily Notes
 
-For each date with entries, append a `### FreshBooks` section to the daily note:
+For each date with entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| Technomic | 2.0 | Development |
-| **Total** | **8.0** | |
-```
-
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table (same format as freshbooks-time-entry)
+- **separator**: `------`
+- **create_if_missing**: true
 
 ### Phase 6: Verify
 

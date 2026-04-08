@@ -161,22 +161,22 @@ bash $SKILL/scripts/insert-freshbooks.sh $DB \
 
 ### Phase 6: Update Daily Notes
 
-For each date with new entries, append a `### FreshBooks` section to `$VAULT/Daily Notes/YYYY-MM-DD.md`:
+For each date with new entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| K Hovnanian | 5.0 | Development |
-| Technomic | 0.5 | Development |
-| **Total** | **8.0** | |
-```
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {fb_project} | {hours} | {note} |
+  | **Total** | **{sum}** | |
+  ```
+- **separator**: `------`
+- **create_if_missing**: true
 
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+Right-align Hours column. Add bold Total row.
 
 ### Phase 7: Refresh FreshBooks Browser
 
