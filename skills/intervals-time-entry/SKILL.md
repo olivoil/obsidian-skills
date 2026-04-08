@@ -252,6 +252,13 @@ Use the loaded mappings to:
 - Match Outlook calendar events to projects (from Phase 1.7 data)
 - Look up attendee→project associations from people context
 
+Output format: `Project | Module (if applicable) | Work Type | Hours | Description`
+
+**Module handling**: Some projects have a Module dropdown (e.g., Optimizely CMS Decoupling). Check `project-mappings.md` for listed modules. When building entries:
+- If the work matches a specific module, include `module: "Module Name"` in the entry
+- If no specific module applies, **omit the module field** — the fill script will automatically select "No Module"
+- The script detects the Module dropdown at runtime; projects without it are unaffected
+
 If shared cache files are missing, bootstrap them with this repo's install script before running the workflow.
 
 ### Phase 3: Validate Against Cache

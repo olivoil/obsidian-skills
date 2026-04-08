@@ -34,10 +34,12 @@ Fetch GitHub activity (PRs authored, PRs reviewed, commits, comments) for a spec
 ## Output
 
 Return the structured JSON data with:
-- `prs_authored`: list of `{ repo, number, title, body_snippet, state, created_at, updated_at }`
-- `prs_reviewed`: list of `{ repo, number, title, body_snippet }`
-- `events`: list of `{ type, repo, timestamp, details }`
+- `prs_authored`: list of `{ number, title, body, repo, state, url, createdAt }`
+- `prs_active`: list of `{ number, title, body, repo, state, url, updatedAt }`
+- `prs_reviewed`: list of `{ number, title, body, repo, state, url, author }`
+- `events`: list of `{ type, repo, timestamp, action, ref, pr_number, pr_title, review_state, comment_body }`
 - `date`: the queried date
+- `username`: the GitHub username
 - `available`: boolean (false if gh CLI was unavailable)
 
 If `gh` is not available or not authenticated, return `{ available: false }` with no error.
