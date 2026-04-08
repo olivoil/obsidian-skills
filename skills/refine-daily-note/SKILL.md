@@ -37,16 +37,10 @@ When invoked with `--auto` (e.g., `refine-daily-note --auto` or `refine-daily-no
 
 ### Phase 1: Discover Vault Entities
 
-Build a catalog of all known entities so you can match them against the daily note text. Prefer Obsidian CLI discovery when available, but fall back to direct filesystem reads whenever needed.
+**USE CAPABILITY: discover-vault-entities**
+Pass the resolved vault root from Phase 0. Request all entity types.
 
-1. **Projects**: list files in `Projects/` and extract project names from filenames
-2. **People**: list files in `Persons/`. If frontmatter aliases are available, read them from each person note
-3. **Topics**: list files in `Topics/` and extract topic names from filenames
-4. **Coding sessions**: list files in `Coding/` for cross-reference awareness
-5. **Meetings**: list files in `Meetings/` for cross-reference awareness
-6. **Tags**: if the Obsidian CLI can return tag data, use it; otherwise skip tag discovery quietly
-
-This gives you the full entity catalog to match against the daily note.
+This gives you the full entity catalog to match against the daily note text in later phases (wikilinks, entity suggestions, Slack/GitHub summaries).
 
 ### Phase 1b: Slack Activity Scan
 
