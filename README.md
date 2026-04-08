@@ -93,7 +93,7 @@ Copy a week of time entries from Intervals into FreshBooks.
 Sync Intervals data from local SQLite state into FreshBooks without re-reading everything from the browser.
 
 ### `topic-pulse`
-Research recently active topics and update `Topics/` notes with fresh outside context, links, and compact summaries.
+Research recently active topics from recent notes across the vault, then deepen `Topics/` notes with concept documentation, subtopic exploration, and selective fresh context.
 
 ## Agent model
 
