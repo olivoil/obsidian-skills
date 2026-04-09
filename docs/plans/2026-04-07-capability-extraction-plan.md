@@ -981,8 +981,8 @@ In `skills/intervals-time-entry/SKILL.md`, replace Phase 2 (Load Mappings):
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: resolved vault root
+- **mapping_types**: [project, github, outlook, people]
 Operation: `load`
-Load mapping types: `project`, `github`, `outlook`, `people`.
 
 Use the loaded mappings to:
 - Resolve project→workType for each time entry (Phase 3)
@@ -1012,6 +1012,7 @@ When you discover a new repo→project association:
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: resolved vault root
+- **mapping_types**: [github]
 Operation: `learn`
 Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row.
 
@@ -1021,6 +1022,7 @@ When you discover a new calendar event→project association:
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: resolved vault root
+- **mapping_types**: [outlook]
 Operation: `learn`
 Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 ```
@@ -1034,8 +1036,8 @@ In `skills/freshbooks-time-entry/SKILL.md`, replace Phase 1 (Read Project Mappin
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: `$VAULT`
+- **mapping_types**: [freshbooks]
 Operation: `load`
-Load mapping type: `freshbooks`.
 Load the FreshBooks mapping table first so it is ready when Intervals project names are available in Phase 2.
 
 **Client-only entries** (no FB project — Meetings, Biz Dev, Training, Recruiting) use `--client EXSquared` without `--project`. In SQLite they are stored with project = "EXSquared".
@@ -1058,8 +1060,9 @@ In `skills/intervals-to-freshbooks/SKILL.md`, replace Phase 3 (Map Entries):
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: resolved Obsidian vault root
+- **mapping_types**: [freshbooks]
 Operation: `resolve`
-Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `data_to_map`.
+Pass the Intervals entries from Phase 2 as `data_to_map`.
 
 For each Intervals entry, the capability resolves the FreshBooks destination:
 - **Client** is always required for invoicing (defaults to "EXSquared")

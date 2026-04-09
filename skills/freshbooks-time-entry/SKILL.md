@@ -82,8 +82,8 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: `$VAULT`
+- **mapping_types**: [freshbooks]
 Operation: `load`
-Load mapping type: `freshbooks`.
 
 Load the FreshBooks mapping table first so it is ready when Intervals project names are available in Phase 2.
 

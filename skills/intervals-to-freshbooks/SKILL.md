@@ -61,8 +61,9 @@ Copy weekly time entries from Intervals to FreshBooks.
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: resolved Obsidian vault root (the same root used for SQLite persistence and daily-note writes)
+- **mapping_types**: [freshbooks]
 Operation: `resolve`
-Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `data_to_map`.
+Pass the Intervals entries from Phase 2 as `data_to_map`.
 
 For each Intervals entry, the capability resolves the FreshBooks destination:
 - **Client** is always required for invoicing (defaults to "EXSquared")
