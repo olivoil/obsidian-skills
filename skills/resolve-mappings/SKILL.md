@@ -24,7 +24,11 @@ Load mapping files from `.cache/om/intervals-cache/`, apply them to input data, 
 
 1. **Load mapping files** from `{vault_root}/.cache/om/intervals-cache/`:
    - Read each requested mapping file
-   - Parse the markdown tables into structured data
+   - Parse the structured markdown into data — format varies by file:
+     - `project-mappings.md`: heading+bullet format (`### Project Name` with `- Work Type` bullets)
+     - `github-mappings.md`, `freshbooks-mappings.md`: markdown table format
+     - `outlook-mappings.md`: mixed (tables for subject patterns and recurring meetings)
+     - `slack-mappings.md`, `people-context.md`: structured markdown (varies)
    - If a file is missing, report it and continue with others
 
 2. **Apply mappings** (if `data_to_map` is provided):

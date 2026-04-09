@@ -23,13 +23,15 @@ Fetch GitHub activity (PRs authored, PRs reviewed, commits, comments) for a spec
    ```
    Where `$SKILL` is this capability's base directory.
 
-3. **Parse the JSON output**. The script returns:
+3. **Filter by repos** (if `repos` input was provided): after fetching, filter the results to only include entries where the `repo` field matches one of the requested `owner/repo` strings. The script fetches all activity; repo scoping is applied post-fetch.
+
+4. **Parse the JSON output**. The script returns:
    - `prs_authored`: PRs created or updated on the date (includes title, body snippet, repo, number, state)
    - `prs_active`: PRs with push/comment activity on the date
    - `prs_reviewed`: PRs the user reviewed on the date (includes title, body snippet)
    - `events`: timestamped activity (pushes, reviews, comments, issue actions)
 
-4. **IMPORTANT**: The script output already includes PR titles and body snippets. Do NOT make separate `gh pr view` calls — use the data already returned.
+5. **IMPORTANT**: The script output already includes PR titles and body snippets. Do NOT make separate `gh pr view` calls — use the data already returned.
 
 ## Output
 
