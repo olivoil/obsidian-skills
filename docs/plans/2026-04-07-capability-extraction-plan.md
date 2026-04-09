@@ -524,6 +524,7 @@ With:
 ### 4. Link from the daily note
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved vault root from Phase 0
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### Coding Sessions`
 - **content**: `- [[{date}--{repo-name}--{branch}]] - {one-line summary}`
@@ -542,6 +543,7 @@ In `skills/intervals-time-entry/SKILL.md`, replace Phase 7 (the entire "Write Ti
 ### Phase 7: Write Time Entry Table to Daily Note
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved vault root
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### Intervals`
 - **content**: the markdown table built from ENTRIES data:
@@ -568,6 +570,7 @@ In `skills/freshbooks-time-entry/SKILL.md`, replace Phase 6 with:
 For each date with new entries:
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: `$VAULT`
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### FreshBooks`
 - **content**: the markdown table:
@@ -594,6 +597,7 @@ In `skills/intervals-to-freshbooks/SKILL.md`, replace the "Step 3: Append FreshB
 For each date with entries:
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved Obsidian vault root
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### FreshBooks`
 - **content**: the markdown table (same format as freshbooks-time-entry)
@@ -972,6 +976,7 @@ In `skills/intervals-time-entry/SKILL.md`, replace Phase 2 (Load Mappings):
 ### Phase 2: Load Mappings
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Operation: `load`
 Load mapping types: `project`, `github`, `outlook`, `people`.
 
@@ -1002,6 +1007,7 @@ Update Phases 5.5 and 5.6 to reference the capability's learning feature:
 When you discover a new repo→project association:
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Operation: `learn`
 Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row.
 
@@ -1010,6 +1016,7 @@ Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row
 When you discover a new calendar event→project association:
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Operation: `learn`
 Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 ```
@@ -1022,6 +1029,7 @@ In `skills/freshbooks-time-entry/SKILL.md`, replace Phase 1 (Read Project Mappin
 ### Phase 1: Read Project Mappings
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: `$VAULT`
 Operation: `resolve`
 Load mapping type: `freshbooks`.
 Pass the candidate Intervals project names as `data_to_map`.
@@ -1041,6 +1049,7 @@ In `skills/intervals-to-freshbooks/SKILL.md`, replace Phase 3 (Map Entries):
 ### Phase 3: Map Entries
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved Obsidian vault root
 Operation: `resolve`
 Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `data_to_map`.
 

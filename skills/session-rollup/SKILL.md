@@ -99,6 +99,7 @@ Omit any empty section.
 ### 4. Link from the daily note
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved vault root from Phase 0
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### Coding Sessions`
 - **content**: `- [[{date}--{repo-name}--{branch}]] - {one-line summary}`

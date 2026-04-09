@@ -81,6 +81,7 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 ### Phase 1: Read Project Mappings
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: `$VAULT`
 Operation: `resolve`
 Load mapping type: `freshbooks`.
 Pass the candidate Intervals project names as `data_to_map`.
@@ -171,6 +172,7 @@ bash $SKILL/scripts/insert-freshbooks.sh $DB \
 For each date with new entries:
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: `$VAULT`
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### FreshBooks`
 - **content**: the markdown table:

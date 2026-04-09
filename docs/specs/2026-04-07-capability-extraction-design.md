@@ -198,6 +198,7 @@ If a harness cannot reliably do nested invocation yet, the fallback is:
 Fetch activity for the target date.
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Resolve repo-to-project mappings for the repos found above.
 
 Now correlate the activity with mapped projects...

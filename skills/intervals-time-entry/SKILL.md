@@ -249,6 +249,7 @@ Use the entity catalog to:
 ### Phase 2: Load Mappings
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Operation: `load`
 Load mapping types: `project`, `github`, `outlook`, `people`.
 
@@ -334,6 +335,7 @@ This ensures future runs skip inspection for this project, saving time and token
 When you discover a new repo→project association (from PR links in notes or inferred from context):
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Operation: `learn`
 Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row.
 
@@ -344,6 +346,7 @@ This helps future correlation work more accurately by remembering which repos be
 When you discover a new calendar event→project association (from subject matching, attendee inference, or user confirmation):
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved vault root
 Operation: `learn`
 Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 
@@ -358,6 +361,7 @@ Take screenshot to confirm entries are correct.
 After verification, write the finalized entries back to the Obsidian daily note as a permanent record.
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved vault root
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### Intervals`
 - **content**: the markdown table built from ENTRIES data:
@@ -367,7 +371,6 @@ After verification, write the finalized entries back to the Obsidian daily note 
   | {project} | {hours} | {description} |
   | **Total** | **{sum}** | |
   ```
-- **vault_root**: resolved vault root
 - **mode**: `replace_section`
 - **position_hint**: `before:### Coding Sessions` (fall back to `after:### Done today`, then `end`)
 - **separator**: `------`

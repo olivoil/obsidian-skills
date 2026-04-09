@@ -28,6 +28,10 @@ Copy weekly time entries from Intervals to FreshBooks.
 1. Call `list_pages` to find Intervals browser tab
 2. Find Intervals tab (URL contains `intervalsonline.com/time/`)
 3. If missing, inform user and stop
+4. Resolve the Obsidian vault root before any mapping or daily-note writes:
+   - **Preferred**: run `obsidian vault info=path`
+   - **Fallback**: use `$OBSIDIAN_VAULT_PATH` if already set
+   - If neither is available, stop and ask the user for the vault location
 
 ### Phase 2: Read from Intervals
 
@@ -56,6 +60,7 @@ Copy weekly time entries from Intervals to FreshBooks.
 ### Phase 3: Map Entries
 
 **USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved Obsidian vault root (the same root used for SQLite persistence and daily-note writes)
 Operation: `resolve`
 Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `data_to_map`.
 
@@ -162,6 +167,7 @@ SQL
 For each date with entries:
 
 **USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved Obsidian vault root
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### FreshBooks`
 - **content**: the markdown table (same format as freshbooks-time-entry)
