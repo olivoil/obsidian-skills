@@ -78,15 +78,14 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 
 ## Workflow
 
-### Phase 1: Read Project Mappings
+### Phase 1: Load FreshBooks Mapping Table
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: `$VAULT`
-Operation: `resolve`
+Operation: `load`
 Load mapping type: `freshbooks`.
-Pass the candidate Intervals project names as `data_to_map`.
 
-Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended like `(20250040)`).
+Load the FreshBooks mapping table first so it is ready when Intervals project names are available in Phase 2.
 
 | Intervals Project (contains) | FB Project | FB Note | Has FB Project? |
 |-------------------------------|-----------|---------|-----------------|
@@ -111,7 +110,7 @@ Build a lookup from Intervals project name to FreshBooks destination. Match usin
 
 1. Run `query-intervals.sh` to get Intervals daily totals by project
 2. Run `query-freshbooks.sh` to get existing FreshBooks entries
-3. For each Intervals row, map the project name to FB project + note using the lookup
+3. Using the loaded FreshBooks mapping table, map each Intervals row's project name to FB project + note. Match using CONTAINS because Intervals project names may have SOW numbers appended like `(20250040)`.
 4. Check if FreshBooks already has a matching row for that date + FB project + note
 5. Collect all unmatched rows as gaps
 

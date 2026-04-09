@@ -34,9 +34,16 @@ These files persist between sessions. Seed them from this repo's templates on fi
 
 ## Workflow
 
+### Phase 0: Resolve Vault Context
+
+1. Resolve the Obsidian vault root before any capability call that needs `vault_root`:
+   - **Preferred**: run `obsidian vault info=path`
+   - **Fallback**: use the current repo root if the CLI is unavailable or unresponsive
+2. Determine the target date. Default to today unless the user specified a different day.
+
 ### Phase 1: Read Notes
 
-Read the daily note for the requested date. Default location: `Daily Notes/YYYY-MM-DD.md`
+Read the daily note for the requested date from `{vault_root}/Daily Notes/YYYY-MM-DD.md`.
 
 Look for:
 - Time entries with project/work descriptions

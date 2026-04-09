@@ -1026,20 +1026,24 @@ Learn new mapping: type `outlook`, add the subject pattern or recurring meeting 
 In `skills/freshbooks-time-entry/SKILL.md`, replace Phase 1 (Read Project Mappings):
 
 ```markdown
-### Phase 1: Read Project Mappings
+### Phase 1: Load FreshBooks Mapping Table
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: `$VAULT`
-Operation: `resolve`
+Operation: `load`
 Load mapping type: `freshbooks`.
-Pass the candidate Intervals project names as `data_to_map`.
-
-Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended).
+Load the FreshBooks mapping table first so it is ready when Intervals project names are available in Phase 2.
 
 **Client-only entries** (no FB project — Meetings, Biz Dev, Training, Recruiting) use `--client EXSquared` without `--project`. In SQLite they are stored with project = "EXSquared".
 ```
 
 (Keep the existing mapping examples table from the current Phase 1 as documentation below the capability reference — it's workflow-specific reference data.)
+
+Then, in Phase 2 where `query-intervals.sh` has already produced Intervals rows, update the mapping step to say:
+
+```markdown
+3. Using the loaded FreshBooks mapping table, map each Intervals row's project name to FB project + note. Match using CONTAINS because Intervals project names may have SOW numbers appended.
+```
 
 **Step 3: Update `intervals-to-freshbooks`**
 
