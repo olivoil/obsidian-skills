@@ -35,4 +35,8 @@ grep -q 'sqlite-placeholder' "$TARGET/.cache/om/time-entries.db"
 [[ -f "$TARGET/.cache/om/intervals-cache/freshbooks-mappings.md" ]]
 [[ -f "$TARGET/.cache/om/intervals-cache/outlook-mappings.md" ]]
 
+# docs/help contract
+grep -q -- '--reset-cache' "$REPO_ROOT/install.sh"
+grep -q 'overwrites installed skills only' "$REPO_ROOT/INSTALL.md"
+
 echo "smoke install passed"
