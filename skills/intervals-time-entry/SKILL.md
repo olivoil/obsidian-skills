@@ -1,5 +1,6 @@
 ---
 name: intervals-time-entry
+type: workflow
 description: Prepare and fill Intervals Online time-entry rows from daily notes with GitHub and Outlook calendar correlation. Use when asked to prepare or fill Intervals hours for manual review. The assistant must show the proposed entries and hours before filling, let the user tweak them, require explicit confirmation to proceed, and never click Save or submit the timesheet.
 ---
 
@@ -55,17 +56,10 @@ Look for:
 
 #### Step 1: Fetch Activity
 
-**Run this command** (replace YYYY-MM-DD with the target date):
-```bash
-bash scripts/fetch-github-activity.sh YYYY-MM-DD
-```
+**USE CAPABILITY: read-github-activity**
+Fetch activity for the target date.
 
-This returns JSON with:
-- PRs authored (created or updated)
-- PRs reviewed
-- Events with timestamps (commits, reviews, comments)
-
-**IMPORTANT**: The script output already includes PR titles and body snippets in `prs_authored`, `prs_active`, and `prs_reviewed`. Do NOT make separate `gh pr view` calls — use the data already returned by the script.
+The capability returns structured JSON with PRs authored, PRs reviewed, and timestamped events. PR titles and body snippets are already included — do NOT make separate `gh pr view` calls.
 
 #### Step 2: Correlate with Notes
 
@@ -249,14 +243,26 @@ This gap analysis helps:
 - Identify development blocks between meetings
 - Suggest time allocations for unaccounted gaps
 
+### Phase 1.8: Discover Vault Entities
+
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects` and `people` types.
+
+Use the entity catalog to:
+- Correlate GitHub repos to project names in Phase 1.5
+- Match calendar attendees to person notes in Phase 1.7
+- Validate project names before mapping resolution in Phase 2
+
 ### Phase 2: Load Mappings
 
-1. **Read project cache**: `.cache/om/intervals-cache/project-mappings.md` (in the project root)
-2. **Read GitHub mappings cache**: `.cache/om/intervals-cache/github-mappings.md` (learned repo→project associations)
-3. **Read Outlook mappings cache**: `.cache/om/intervals-cache/outlook-mappings.md` (learned calendar→project associations)
-4. **Read defaults from `references/worktype-mappings.md` and shared state from `.cache/om/intervals-cache/people-context.md`**
+**USE CAPABILITY: resolve-mappings**
+Load mapping types: `project`, `github`, `outlook`, `people`.
 
-If shared cache files are missing, bootstrap them with this repo's install script before running the workflow.
+Use the loaded mappings to:
+- Resolve project→workType for each time entry (Phase 3)
+- Correlate GitHub repos to projects (from Phase 1.5 data)
+- Match Outlook calendar events to projects (from Phase 1.7 data)
+- Look up attendee→project associations from people context
 
 Output format: `Project | Module (if applicable) | Work Type | Hours | Description`
 
@@ -267,9 +273,11 @@ This is the preview table you must show the user before filling anything in Inte
 - If no specific module applies, **omit the module field** — the fill script will automatically select "No Module"
 - The script detects the Module dropdown at runtime; projects without it are unaffected
 
+If shared cache files are missing, bootstrap them with this repo's install script before running the workflow.
+
 ### Phase 3: Validate Against Cache
 
-Check the project cache for work types:
+Using the mappings from Phase 2, check each time entry's project has cached work types:
 - If all projects have cached work types → skip browser inspection
 - If any project is NOT cached → inspect browser to discover its work types
 
@@ -345,43 +353,17 @@ This ensures future runs skip inspection for this project, saving time and token
 
 ### Phase 5.5: Update GitHub Mappings Cache
 
-When you discover a new repo→project association (from PR links in notes or inferred from context):
+When you discover a new repo→project association:
 
-1. Read the current cache: `.cache/om/intervals-cache/github-mappings.md`
-2. Add the mapping to the table:
-
-```markdown
-| owner/repo-name | Intervals Project Name |
-```
-
-3. Write the updated file back
-
-This helps future correlation work more accurately by remembering which repos belong to which projects.
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row.
 
 ### Phase 5.6: Update Outlook Mappings Cache
 
-When you discover a new calendar event→project association (from subject matching, attendee inference, or user confirmation):
+When you discover a new calendar event→project association:
 
-1. Read the current cache: `.cache/om/intervals-cache/outlook-mappings.md`
-2. Add the mapping to the appropriate table:
-
-For subject→project mappings:
-```markdown
-| Calendar Subject Pattern | Intervals Project | Work Type |
-|--------------------------|-------------------|-----------|
-| Technomic-EXSQ Weekly Touchbase | Ignite Application Development & Support | Meeting: Client Meeting - US |
-```
-
-For recurring meeting mappings:
-```markdown
-| Meeting Name | Intervals Project | Work Type |
-|-------------|-------------------|-----------|
-| Technomic Scrum | Ignite Application Development & Support | Meeting: Internal Stand Up - US |
-```
-
-3. Write the updated file back
-
-This helps future runs instantly map recurring meetings to the correct project and work type.
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 
 ### Phase 6: Verify Filled Rows
 
@@ -391,47 +373,20 @@ Take screenshot to confirm the filled rows are correct.
 
 ### Phase 7: Write Time Entry Table to Daily Note
 
-After verification, write the finalized entries back to the Obsidian daily note as a permanent record.
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### Intervals`
+- **content**: the markdown table built from ENTRIES data:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {project} | {hours} | {description} |
+  | **Total** | **{sum}** | |
+  ```
+- **position_hint**: `before:### Coding Sessions` (fall back to `after:### Done today`, then `end`)
+- **separator**: `------`
 
-#### Step 1: Resolve Vault Path
-
-Read `$OBSIDIAN_VAULT_PATH` from the environment. The daily note is at:
-```
-$OBSIDIAN_VAULT_PATH/Daily Notes/YYYY-MM-DD.md
-```
-
-#### Step 2: Read the Daily Note
-
-Read the daily note file to find the insertion point.
-
-#### Step 3: Insert or Replace the Intervals Section
-
-Look for an existing `### Intervals` section:
-- **If found**: Replace the entire section (from `### Intervals` to the next `###` or `---` or end of file) with the updated table
-- **If not found**: Insert the section using this priority:
-  1. Before `### Coding Sessions` if it exists
-  2. After `### Open todos` (before the next `###` or `---`)
-  3. After `### Done today` if `### Open todos` doesn't exist
-  4. At the end of the note if none of the above exist
-
-#### Step 4: Write the Table
-
-Format as a markdown table with a horizontal rule before it:
-
-```markdown
-------
-### Intervals
-| Project | Hours | Description |
-|---------|------:|-------------|
-| Ignite Application Development & Support | 2 | Weekly touchbase with Technomic |
-| EWG Feature Enhancement Addendum | 3.5 | Add pagination endpoint (PR #574) |
-| **Total** | **5.5** | |
-```
-
-- Use the same ENTRIES data that was sent to `fill-entries.js`
-- Right-align the Hours column
-- Add a bold **Total** row summing all hours
-- The `------` separator goes before `### Intervals` to visually separate it from the section above
+Use the same ENTRIES data that was sent to `fill-entries.js`. Right-align Hours column. Add bold Total row.
 
 ### Phase 8: Insert into SQLite Database
 

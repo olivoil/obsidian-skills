@@ -1,5 +1,6 @@
 ---
 name: freshbooks-time-entry
+type: workflow
 description: Sync Intervals time entries from SQLite to FreshBooks. Faster than browser-based sync since it reads local data. Use when asked to sync time to FreshBooks, enter FreshBooks time, or fill FreshBooks from Intervals.
 ---
 
@@ -76,28 +77,12 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 
 ### Phase 1: Read Project Mappings
 
-Read the mapping file at `.cache/om/intervals-cache/freshbooks-mappings.md`.
+**USE CAPABILITY: resolve-mappings**
+Load mapping type: `freshbooks`.
 
-Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended like `(20250040)`).
+Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended).
 
-| Intervals Project (contains) | FB Project | FB Note | Has FB Project? |
-|-------------------------------|-----------|---------|-----------------|
-| Ignite Application Development | Technomic | Development | yes |
-| Optimizely CMS | K Hovnanian | Development | yes |
-| Drees Maintenance | Drees | Development | yes |
-| DHDC Pre Buyer | Drees | Development | yes |
-| EWG Feature Enhancement | EWG | Development | yes |
-| EWG App v3 | EWG | Development | yes |
-| Mattamy Homes | Mattamy Homes | Development | yes |
-| CDS Digital Product | SLB | Development | yes |
-| Monthly Maintenance Agreement | TeleDynamics | Development | yes |
-| YPO - ProductOps | YPO | Development | yes |
-| Meeting | (none) | Meetings | no (client-only) |
-| Biz Dev / Sales | (none) | Business Development | no (client-only) |
-| Training | (none) | Training | no (client-only) |
-| Recruiting | (none) | Recruiting | no (client-only) |
-
-**Client-only entries** (no FB project) use `--client EXSquared` without `--project`. In SQLite they are stored with project = "EXSquared".
+**Client-only entries** (no FB project — Meetings, Biz Dev, Training, Recruiting) use `--client EXSquared` without `--project`. In SQLite they are stored with project = "EXSquared".
 
 ### Phase 2: Query SQLite for Gaps
 
@@ -161,22 +146,22 @@ bash $SKILL/scripts/insert-freshbooks.sh $DB \
 
 ### Phase 6: Update Daily Notes
 
-For each date with new entries, append a `### FreshBooks` section to `$VAULT/Daily Notes/YYYY-MM-DD.md`:
+For each date with new entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| K Hovnanian | 5.0 | Development |
-| Technomic | 0.5 | Development |
-| **Total** | **8.0** | |
-```
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {fb_project} | {hours} | {note} |
+  | **Total** | **{sum}** | |
+  ```
+- **separator**: `------`
+- **create_if_missing**: true
 
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+Right-align Hours column. Add bold Total row.
 
 ### Phase 7: Refresh FreshBooks Browser
 

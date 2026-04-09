@@ -1,5 +1,6 @@
 ---
 name: intervals-to-freshbooks
+type: workflow
 description: Copy a week's worth of time entries from Intervals to FreshBooks. Use when asked to sync time entries between Intervals and FreshBooks.
 ---
 
@@ -51,19 +52,13 @@ Copy weekly time entries from Intervals to FreshBooks.
 
 ### Phase 3: Map Entries
 
-For each Intervals entry, determine the FreshBooks destination:
-- **Client** is always required for invoicing (defaults to "EXSquared")
-- **Project** is optional - use when work is for a specific project
-- If unmapped, ask user for the FreshBooks mapping
-- Update `.cache/om/intervals-cache/freshbooks-mappings.md` with new mappings
+**USE CAPABILITY: resolve-mappings**
+Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `data_to_map`.
 
-**Mapping examples:**
-| Intervals Client | Intervals Project | FB Client | FB Project |
-|-----------------|-------------------|-----------|------------|
-| Technomic | Ignite App... | EXSquared | Technomic |
-| EWG - Neuron | Feature Enhancement | EXSquared | EWG |
-| EX Squared Services | Meeting | EXSquared | (none) |
-| EX Squared Services | Biz Dev / Sales | EXSquared | (none) |
+For each Intervals entry, the capability resolves the FreshBooks destination:
+- **Client** is always required for invoicing (defaults to "EXSquared")
+- **Project** is optional — use when work is for a specific project
+- For unmapped entries, ask user for the FreshBooks mapping and learn it via the capability
 
 ### Phase 4: Create FreshBooks Time Entries via API
 
@@ -152,21 +147,14 @@ SQL
 
 #### Step 3: Append FreshBooks Section to Daily Notes
 
-For each date with entries, append a `### FreshBooks` section to the daily note:
+For each date with entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| Technomic | 2.0 | Development |
-| **Total** | **8.0** | |
-```
-
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table (same format as freshbooks-time-entry)
+- **separator**: `------`
+- **create_if_missing**: true
 
 ### Phase 6: Verify
 
