@@ -96,14 +96,17 @@ Omit any empty section.
 
 ### 4. Link from the daily note
 
+1. Read the daily note and check if a `### Coding Sessions` section already exists.
+2. If it exists, read its current bullets. Build **content** by appending the new bullet to the existing entries.
+3. If it does not exist, **content** is just the new bullet.
+
 **USE CAPABILITY: write-vault-section**
 - **note_path**: `Daily Notes/{date}.md`
 - **section_heading**: `### Coding Sessions`
-- **content**: `- [[{date}--{repo-name}--{branch}]] - {one-line summary}`
+- **content**: all existing bullets (if any) plus the new one:
+  `- [[{date}--{repo-name}--{branch}]] - {one-line summary}`
 - **position_hint**: `end`
 - **create_if_missing**: true
-
-If the section already has entries from other sessions today, append the new bullet to the existing content rather than replacing.
 
 ### 5. Confirm
 
