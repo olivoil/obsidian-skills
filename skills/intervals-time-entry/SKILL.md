@@ -1,12 +1,12 @@
 ---
 name: intervals-time-entry
 type: workflow
-description: Fill Intervals Online time entries from daily notes with GitHub and Outlook calendar correlation. Use when asked to fill time entries, timesheets, or submit hours to Intervals. Requires a browser automation tool capable of evaluating JavaScript in page context, with Intervals open.
+description: Prepare and fill Intervals Online time-entry rows from daily notes with GitHub and Outlook calendar correlation. Use when asked to prepare or fill Intervals hours for manual review. The assistant must show the proposed entries and hours before filling, let the user tweak them, require explicit confirmation to proceed, and never click Save or submit the timesheet.
 ---
 
 # Intervals Time Entry Automation
 
-Fill time entries in Intervals Online from Obsidian daily notes using browser automation, with GitHub activity and Outlook calendar correlation.
+Prepare and fill time entries in Intervals Online from Obsidian daily notes using browser automation, with GitHub activity and Outlook calendar correlation. The assistant must always preview the proposed hours first, wait for user confirmation before filling, and never submit the timesheet.
 
 ## Prerequisites
 
@@ -26,6 +26,18 @@ Fill time entries in Intervals Online from Obsidian daily notes using browser au
 ```
 
 These files persist between sessions. Seed them from this repo's templates on first install, then treat them as shared runtime state for both Claude and Codex.
+
+## Mandatory Safety Gates
+
+These rules are not optional:
+
+1. **Preview before filling** — Before any Intervals form is filled, show the proposed entries to the user as a table with:
+   `Project | Module (if any) | Work Type | Hours | Description`
+   and include the total hours.
+2. **Tweak loop required** — If the user wants changes, revise the proposed entries, show the updated table again, and wait. Do not fill until the user is satisfied.
+3. **Explicit go-ahead required** — Only run the fill script after the user explicitly confirms they want you to proceed (for example: “go ahead”, “fill them in”, or equivalent).
+4. **Fill only, never submit** — Never click Intervals Save/Submit buttons or trigger any final submission action yourself. Filling the rows is allowed; submitting the timesheet is always the user's manual step.
+5. **Hand control back after fill** — After the rows are filled, take a screenshot, point out that the form is ready for review, and tell the user to submit manually if everything looks right.
 
 ## Workflow
 
@@ -254,6 +266,8 @@ Use the loaded mappings to:
 
 Output format: `Project | Module (if applicable) | Work Type | Hours | Description`
 
+This is the preview table you must show the user before filling anything in Intervals.
+
 **Module handling**: Some projects have a Module dropdown (e.g., Optimizely CMS Decoupling). Check `project-mappings.md` for listed modules. When building entries:
 - If the work matches a specific module, include `module: "Module Name"` in the entry
 - If no specific module applies, **omit the module field** — the fill script will automatically select "No Module"
@@ -266,6 +280,20 @@ If shared cache files are missing, bootstrap them with this repo's install scrip
 Using the mappings from Phase 2, check each time entry's project has cached work types:
 - If all projects have cached work types → skip browser inspection
 - If any project is NOT cached → inspect browser to discover its work types
+
+### Phase 3.5: Preview and User Confirmation Gate (REQUIRED)
+
+Before any browser fill action:
+
+1. Build the proposed `ENTRIES` array from the validated notes/GitHub/calendar correlation work.
+2. Show the user the proposed entries as a markdown table using:
+   `Project | Module (if applicable) | Work Type | Hours | Description`
+3. Include the total hours and call out anything inferred or uncertain.
+4. Invite the user to tweak the hours, descriptions, project mappings, modules, or work types.
+5. If the user requests changes, update the entries and show the revised table again.
+6. Do **not** run `fill-entries.js` until the user gives explicit approval to proceed with filling.
+
+Approval to fill is **not** approval to save or submit. Saving/submitting always remains manual for the user.
 
 ### Phase 4: Browser Automation
 
@@ -285,7 +313,7 @@ Use your browser automation tool with these scripts from `scripts/`:
 
 1. **Basic inspection** (`scripts/inspect-basics.js`): Get dates and day index
 2. **Discover work types** (`scripts/discover-worktypes.js`): For uncached projects only
-3. **Fill entries** (`scripts/fill-entries.js`): Fill all validated entries
+3. **Fill entries** (`scripts/fill-entries.js`): Fill all user-approved entries into the form only — never save or submit
 
 **IMPORTANT**: All scripts use arrow function format for MCP compatibility:
 ```javascript
@@ -337,9 +365,11 @@ When you discover a new calendar event→project association:
 **USE CAPABILITY: resolve-mappings**
 Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 
-### Phase 6: Verify
+### Phase 6: Verify Filled Rows
 
-Take screenshot to confirm entries are correct.
+Take screenshot to confirm the filled rows are correct.
+
+**IMPORTANT**: Verification is the end of the browser automation. Do **not** click Save or Submit after this screenshot. Tell the user the rows are filled, ready for review, and that they should submit manually themselves if everything looks right.
 
 ### Phase 7: Write Time Entry Table to Daily Note
 

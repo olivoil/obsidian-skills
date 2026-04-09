@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TARGET_REPO="${1:-$PWD}"
-FORCE="${2:-}"
+RESET_CACHE="${2:-}"
 
 OLD_CLAUDE_DIR="$TARGET_REPO/.claude"
 NEW_CACHE_DIR="$TARGET_REPO/.cache/om"
@@ -17,12 +17,12 @@ copy_file() {
   if [[ ! -e "$src" ]]; then
     return
   fi
-  if [[ -e "$dest" && "$FORCE" != "--force" ]]; then
+  if [[ -e "$dest" && "$RESET_CACHE" != "--reset-cache" ]]; then
     echo "keeping existing: $dest"
     return
   fi
-  if [[ -e "$dest" && "$FORCE" == "--force" ]]; then
-    mv "$dest" "$dest.bak.$(date +%Y%m%d%H%M%S)"
+  if [[ -e "$dest" && "$RESET_CACHE" == "--reset-cache" ]]; then
+    rm -rf "$dest"
   fi
   mkdir -p "$(dirname "$dest")"
   cp -a "$src" "$dest"

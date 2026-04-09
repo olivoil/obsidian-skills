@@ -1,7 +1,7 @@
 interface:
   display_name: "Intervals Time Entry"
-  short_description: "Fill Intervals time entries from daily notes and related activity."
-  default_prompt: "Use this skill to prepare or fill Intervals time entries from the vault."
+  short_description: "Prepare and fill Intervals time entries for manual review and manual submit."
+  default_prompt: "Use this skill to prepare and fill Intervals time entries from the vault, but always show the proposed hours first and never submit them."
 
 policy:
   allow_implicit_invocation: false

@@ -10,7 +10,7 @@ async () => {
   // Day index from dayIndexMap: Sun=0, Mon=1, Tue=2, Wed=3, Thu=4, Fri=5, Sat=6
   const DAY_INDEX = 2;
   
-  // Validated entries - use exact project/workType names from dropdowns
+  // User-approved entries - use exact project/workType names from dropdowns
   // Optional "module" field: use exact module name, or omit to auto-select "No Module" if dropdown exists
   const ENTRIES = [
     { project: "Ignite Application Development & Support", workType: "Meeting: Client Meeting - US", hours: "1", description: "Example entry" },
@@ -171,7 +171,7 @@ async () => {
     totalHours,
     errors,
     message: errors.length === 0 
-      ? `Filled ${successCount} entries (${totalHours}h). Review and click Save.`
+      ? `Filled ${successCount} entries (${totalHours}h). Review the filled rows with the user. The user must click Save manually.`
       : `Filled ${successCount}/${ENTRIES.length}. Errors: ${errors.map(e => e.error).join(', ')}`
   };
 }
