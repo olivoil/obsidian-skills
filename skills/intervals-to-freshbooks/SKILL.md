@@ -1,5 +1,9 @@
 ---
 name: intervals-to-freshbooks
+type: workflow
+uses:
+  - resolve-mappings
+  - write-vault-section
 description: Copy a week's worth of time entries from Intervals to FreshBooks. Use when asked to sync time entries between Intervals and FreshBooks.
 ---
 
@@ -24,6 +28,10 @@ Copy weekly time entries from Intervals to FreshBooks.
 1. Call `list_pages` to find Intervals browser tab
 2. Find Intervals tab (URL contains `intervalsonline.com/time/`)
 3. If missing, inform user and stop
+4. Resolve the Obsidian vault root before any mapping or daily-note writes:
+   - **Preferred**: run `obsidian vault info=path`
+   - **Fallback**: use `$OBSIDIAN_VAULT_PATH` if already set
+   - If neither is available, stop and ask the user for the vault location
 
 ### Phase 2: Read from Intervals
 
@@ -51,11 +59,18 @@ Copy weekly time entries from Intervals to FreshBooks.
 
 ### Phase 3: Map Entries
 
-For each Intervals entry, determine the FreshBooks destination:
+**USE CAPABILITY: resolve-mappings**
+- **vault_root**: resolved Obsidian vault root (the same root used for SQLite persistence and daily-note writes)
+- **mapping_types**: [freshbooks]
+Operation: `resolve`
+Pass the Intervals entries from Phase 2 as `data_to_map`.
+
+For each Intervals entry, the capability resolves the FreshBooks destination:
 - **Client** is always required for invoicing (defaults to "EXSquared")
 - **Project** is optional - use when work is for a specific project
-- If unmapped, ask user for the FreshBooks mapping
-- Update `.cache/om/intervals-cache/freshbooks-mappings.md` with new mappings
+- For unmapped entries, ask the user for the FreshBooks mapping and learn it via the capability using:
+  - `operation = learn`
+  - `mapping_types = [freshbooks]`
 
 **Mapping examples:**
 | Intervals Client | Intervals Project | FB Client | FB Project |
@@ -152,21 +167,16 @@ SQL
 
 #### Step 3: Append FreshBooks Section to Daily Notes
 
-For each date with entries, append a `### FreshBooks` section to the daily note:
+For each date with entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| Technomic | 2.0 | Development |
-| **Total** | **8.0** | |
-```
-
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+**USE CAPABILITY: write-vault-section**
+- **vault_root**: resolved Obsidian vault root
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table (same format as freshbooks-time-entry)
+- **mode**: `replace_section`
+- **separator**: `------`
+- **create_if_missing**: true
 
 ### Phase 6: Verify
 

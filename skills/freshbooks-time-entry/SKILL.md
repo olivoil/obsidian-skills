@@ -1,5 +1,9 @@
 ---
 name: freshbooks-time-entry
+type: workflow
+uses:
+  - resolve-mappings
+  - write-vault-section
 description: Sync Intervals time entries from SQLite to FreshBooks. Faster than browser-based sync since it reads local data. Use when asked to sync time to FreshBooks, enter FreshBooks time, or fill FreshBooks from Intervals.
 ---
 
@@ -74,11 +78,14 @@ Other commands: `projects`, `clients`, `list-time-entries --from DATE --to DATE`
 
 ## Workflow
 
-### Phase 1: Read Project Mappings
+### Phase 1: Load FreshBooks Mapping Table
 
-Read the mapping file at `.cache/om/intervals-cache/freshbooks-mappings.md`.
+**USE CAPABILITY: resolve-mappings**
+- **vault_root**: `$VAULT`
+- **mapping_types**: [freshbooks]
+Operation: `load`
 
-Build a lookup from Intervals project name to FreshBooks destination. Match using CONTAINS (Intervals project names may have SOW numbers appended like `(20250040)`).
+Load the FreshBooks mapping table first so it is ready when Intervals project names are available in Phase 2.
 
 | Intervals Project (contains) | FB Project | FB Note | Has FB Project? |
 |-------------------------------|-----------|---------|-----------------|
@@ -103,11 +110,13 @@ Build a lookup from Intervals project name to FreshBooks destination. Match usin
 
 1. Run `query-intervals.sh` to get Intervals daily totals by project
 2. Run `query-freshbooks.sh` to get existing FreshBooks entries
-3. For each Intervals row, map the project name to FB project + note using the lookup
+3. Using the loaded FreshBooks mapping table, map each Intervals row's project name to FB project + note. Match using CONTAINS because Intervals project names may have SOW numbers appended like `(20250040)`.
 4. Check if FreshBooks already has a matching row for that date + FB project + note
 5. Collect all unmatched rows as gaps
 
-**If an Intervals project name doesn't match any mapping**, flag it and ask the user. Update `.cache/om/intervals-cache/freshbooks-mappings.md` with the new mapping.
+**If an Intervals project name doesn't match any mapping**, flag it, ask the user, and then persist the confirmed mapping via `resolve-mappings` with:
+- `operation = learn`
+- `mapping_types = [freshbooks]`
 
 **Multiple Intervals projects may map to the same FB project.** Sum their hours per date before comparing. For example, if Intervals has "Optimizely CMS Decoupling" (3h) and "Optimizely CMS Health Check" (1h) on the same day, that's 4h total for "K Hovnanian" in FreshBooks.
 
@@ -161,22 +170,24 @@ bash $SKILL/scripts/insert-freshbooks.sh $DB \
 
 ### Phase 6: Update Daily Notes
 
-For each date with new entries, append a `### FreshBooks` section to `$VAULT/Daily Notes/YYYY-MM-DD.md`:
+For each date with new entries:
 
-```markdown
-------
-### FreshBooks
-| Project | Hours | Description |
-|---------|------:|-------------|
-| K Hovnanian | 5.0 | Development |
-| Technomic | 0.5 | Development |
-| **Total** | **8.0** | |
-```
+**USE CAPABILITY: write-vault-section**
+- **vault_root**: `$VAULT`
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### FreshBooks`
+- **content**: the markdown table:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {fb_project} | {hours} | {note} |
+  | **Total** | **{sum}** | |
+  ```
+- **mode**: `replace_section`
+- **separator**: `------`
+- **create_if_missing**: true
 
-- If `### FreshBooks` already exists in the note, replace it
-- If the daily note doesn't exist, create it with a minimal header
-- Right-align the Hours column
-- Add a bold **Total** row
+Right-align Hours column. Add bold Total row.
 
 ### Phase 7: Refresh FreshBooks Browser
 

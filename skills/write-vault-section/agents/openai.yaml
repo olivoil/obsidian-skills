@@ -1,0 +1,8 @@
+interface:
+  display_name: "Write Vault Section"
+  short_description: "Create or update a named markdown section in a note with explicit replace/append semantics."
+  default_prompt: "Use this capability when a workflow needs to write to a named section in a vault note."
+
+policy:
+  allow_implicit_invocation: false
+

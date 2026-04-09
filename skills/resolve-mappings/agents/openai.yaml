@@ -1,0 +1,7 @@
+interface:
+  display_name: "Resolve Mappings"
+  short_description: "Load, resolve, or learn cache mappings for project, GitHub, Outlook, Slack, FreshBooks, and people context."
+  default_prompt: "Use this capability when a workflow needs mapping tables from .cache/om/intervals-cache."
+
+policy:
+  allow_implicit_invocation: false

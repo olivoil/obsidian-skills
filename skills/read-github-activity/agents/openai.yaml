@@ -1,0 +1,8 @@
+interface:
+  display_name: "Read GitHub Activity"
+  short_description: "Fetch GitHub PR, review, and commit activity for a date."
+  default_prompt: "Use this capability when a workflow needs GitHub activity for a specific date."
+
+policy:
+  allow_implicit_invocation: false
+

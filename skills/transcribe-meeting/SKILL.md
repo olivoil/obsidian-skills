@@ -1,5 +1,8 @@
 ---
 name: transcribe-meeting
+type: workflow
+uses:
+  - discover-vault-entities
 description: Transcribe a meeting recording from the Rodecaster SD card, Google Drive, or a local file. Creates a meeting note with summary, decisions, and action items, plus an MP3 archive. Use when asked to transcribe a meeting recording into the vault.
 ---
 
@@ -120,6 +123,11 @@ Save the JSON result for reuse in Phase 3.5. For each screenshot found, read the
 Collect all names found across all screenshots. **These are the authoritative participants.** If screenshots show who is in the meeting, that list takes priority over all other sources. Do not add names from project pages or other indirect sources that contradict or dilute what the screenshots show.
 
 **Track 2: Vault context (vocabulary only, not participants)**
+
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects`, `people`, and `meetings` types.
+
+Use the people catalog to match participant names from screenshots to existing vault person notes. Use the project catalog to help match likely project names before reading project pages for vocabulary.
 
 1. Read the daily note for the target date (`Daily Notes/{date}.md`)
 2. From the time entry lines, identify which project this recording likely belongs to (match by time proximity to the recording start time)
