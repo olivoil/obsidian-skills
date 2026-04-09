@@ -107,7 +107,9 @@ If no Slack messages were found in Phase 1b, or Slack MCP tools were unavailable
 ### Phase 1d: GitHub Activity Scan
 
 **USE CAPABILITY (optional): read-github-activity**
-Fetch activity for the target date. If the capability returns `available: false`, skip this phase and Phase 1e silently.
+- **date**: target daily-note date
+
+Fetch activity for that date. If the capability returns `available: false`, skip this phase and Phase 1e silently.
 
 Using the returned activity data:
 

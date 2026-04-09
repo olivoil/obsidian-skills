@@ -57,7 +57,9 @@ Look for:
 #### Step 1: Fetch Activity
 
 **USE CAPABILITY: read-github-activity**
-Fetch activity for the target date.
+- **date**: target date resolved in Phase 0
+
+Fetch activity for that date.
 
 The capability returns structured JSON with PRs authored, PRs reviewed, and timestamped events. PR titles and body snippets are already included — do NOT make separate `gh pr view` calls.
 

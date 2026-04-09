@@ -766,7 +766,9 @@ With:
 ### Phase 1d: GitHub Activity Scan
 
 **USE CAPABILITY (optional): read-github-activity**
-Fetch activity for the target date. If the capability returns `available: false`, skip this phase and Phase 1e silently.
+- **date**: target daily-note date
+
+Fetch activity for that date. If the capability returns `available: false`, skip this phase and Phase 1e silently.
 
 Using the returned activity data:
 
@@ -813,7 +815,9 @@ With:
 #### Step 1: Fetch Activity
 
 **USE CAPABILITY: read-github-activity**
-Fetch activity for the target date.
+- **date**: target date resolved in Phase 0
+
+Fetch activity for that date.
 
 The capability returns structured JSON with PRs authored, PRs reviewed, and timestamped events. PR titles and body snippets are already included — do NOT make separate `gh pr view` calls.
 ```

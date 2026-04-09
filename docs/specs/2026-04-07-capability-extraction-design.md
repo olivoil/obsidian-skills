@@ -154,7 +154,9 @@ The workflow can add workflow-specific context after the marker — things the c
 ### Phase 1.5: GitHub Activity Correlation
 
 **USE CAPABILITY: read-github-activity**
-Fetch activity for the target date.
+- **date**: target date resolved by the workflow
+
+Fetch activity for that date.
 
 After receiving the activity data, correlate with time entries from Phase 1:
 1. Match PRs to time entries by repo or PR number
@@ -195,7 +197,9 @@ If a harness cannot reliably do nested invocation yet, the fallback is:
 
 ```markdown
 **USE CAPABILITY: read-github-activity**
-Fetch activity for the target date.
+- **date**: target date resolved by the workflow
+
+Fetch activity for that date.
 
 **USE CAPABILITY: resolve-mappings**
 - **vault_root**: resolved vault root
