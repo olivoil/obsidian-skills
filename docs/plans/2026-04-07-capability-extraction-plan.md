@@ -1056,7 +1056,9 @@ Load mapping type: `freshbooks`. Pass the Intervals entries from Phase 2 as `dat
 For each Intervals entry, the capability resolves the FreshBooks destination:
 - **Client** is always required for invoicing (defaults to "EXSquared")
 - **Project** is optional — use when work is for a specific project
-- For unmapped entries, ask user for the FreshBooks mapping and learn it via the capability using `operation = learn`
+- For unmapped entries, ask user for the FreshBooks mapping and learn it via the capability using:
+  - `operation = learn`
+  - `mapping_types = [freshbooks]`
 ```
 
 **Step 4: Commit**

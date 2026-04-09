@@ -115,7 +115,9 @@ Build a lookup from Intervals project name to FreshBooks destination. Match usin
 4. Check if FreshBooks already has a matching row for that date + FB project + note
 5. Collect all unmatched rows as gaps
 
-**If an Intervals project name doesn't match any mapping**, flag it, ask the user, and then persist the confirmed mapping via `resolve-mappings` with `operation = learn`.
+**If an Intervals project name doesn't match any mapping**, flag it, ask the user, and then persist the confirmed mapping via `resolve-mappings` with:
+- `operation = learn`
+- `mapping_types = [freshbooks]`
 
 **Multiple Intervals projects may map to the same FB project.** Sum their hours per date before comparing. For example, if Intervals has "Optimizely CMS Decoupling" (3h) and "Optimizely CMS Health Check" (1h) on the same day, that's 4h total for "K Hovnanian" in FreshBooks.
 
