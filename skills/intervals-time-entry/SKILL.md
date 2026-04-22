@@ -115,66 +115,25 @@ Example output:
 
 ### Phase 1.7: Outlook Calendar Correlation (REQUIRED)
 
-**ALWAYS run this phase** to visually read the Outlook calendar and cross-reference with notes and GitHub activity.
+**USE CAPABILITY: read-outlook-calendar**
+Fetch calendar events for the target date.
 
-**Prerequisite**: User must be logged into Outlook Web in the browser (same Chrome instance with `--remote-debugging-port=9222`).
+**ALWAYS run this phase.** If the capability returns `available: false`, warn the user and continue without calendar data.
 
-#### Step 1: Find or Open Outlook Web Tab
+Using the returned calendar events, correlate with notes and GitHub data:
 
-**IMPORTANT**: Never navigate away from the user's current tab. Always find an existing Outlook tab or create a new one.
+#### Step 1: Correlate with Notes and GitHub
 
-1. Call `list_pages` to see all open browser tabs
-2. Look for a tab with URL containing `outlook.office.com` or `outlook.live.com`
-3. If found: call `select_page` with that page's ID
-4. If NOT found: call `new_page` with the day view URL (see Step 2)
+1. **Match meetings to time entries**: if notes mention a meeting that appears in the calendar, link them
+2. **Infer project from attendees**: use `.cache/om/intervals-cache/people-context.md` to determine which project a meeting belongs to
+3. **Infer project from subject**: match calendar subjects against `project-mappings.md` terms
+4. **Learn calendar mappings**: when a calendar event clearly maps to a project, add to `.cache/om/intervals-cache/outlook-mappings.md`
 
-#### Step 2: Navigate, Verify, and Extract Calendar Data
-
-**Navigate** to the target date's day view:
-
-```
-https://outlook.office.com/calendar/view/day/YYYY/M/D
-```
-
-Note: month and day are **not zero-padded** (e.g., `2026/2/16` not `2026/02/16`).
-
-- If the tab is already on Outlook but wrong date: call `navigate_page` with the day view URL
-- If a new tab was created in Step 1: it will already be on the correct URL
-
-**Verify the date** — immediately after navigation, call `take_screenshot` and confirm the calendar is showing the correct date. The date header is visible at the top of the day view.
-
-- If the screenshot shows the **wrong date**: wait 3 seconds, then call `navigate_page` again with the same URL. Take another screenshot to verify.
-- If still wrong after retry: try the alternative URL format with zero-padded month/day (e.g., `2026/02/04` instead of `2026/2/4`). Take a screenshot to verify.
-- **Only proceed once the correct date is confirmed** in the screenshot.
-
-**Extract calendar data** visually from the verified screenshot:
-
-- **Meeting subjects** — the text on each calendar block
-- **Start and end times** — from the time labels on the left axis and block positions
-- **Duration** — calculated from start/end times
-- **Declined events** — shown with strikethrough text or dimmed/crossed-out appearance
-- **All-day events** — shown in the top banner area (above the hourly grid)
-- **Attendee names** — visible if shown in the calendar block
-- **Location** — if visible in the calendar block
-
-If the calendar is zoomed out and events are hard to read, note which events need clarification and proceed with what's visible.
-
-**CRITICAL**: Use `take_screenshot` for visual reading — do NOT use `take_snapshot`, DOM inspection, or click-based navigation for calendar data extraction. The entire point of this phase is visual analysis without brittle DOM dependencies. If the screenshot is unclear, take another screenshot — never fall back to DOM snapshots or clicking calendar elements.
-
-#### Step 2: Correlate with Notes and GitHub
-
-Using the visually extracted calendar data, cross-reference with notes and GitHub data:
-
-1. **Match meetings to time entries**: If notes mention a meeting that appears in the calendar, link them
-2. **Infer project from attendees**: Use `.cache/om/intervals-cache/people-context.md` to determine which project a meeting belongs to
-3. **Infer project from subject**: Match calendar subjects against `project-mappings.md` terms
-4. **Learn calendar mappings**: When a calendar event clearly maps to a project, add to `.cache/om/intervals-cache/outlook-mappings.md`
-
-#### Step 4: Detect Missing Entries
+#### Step 2: Detect Missing Entries
 
 Compare calendar events against notes and flag gaps:
 
-**Missing time entries**: If the calendar shows a meeting but notes have no corresponding entry, suggest adding one.
+**Missing time entries**: if the calendar shows a meeting but notes have no corresponding entry, suggest adding one.
 
 ```
 📅 Calendar shows "Technomic-EXSQ Weekly Touchbase" (11:00-12:00, 1h)
@@ -182,9 +141,9 @@ Compare calendar events against notes and flag gaps:
    Suggest: Ignite Application Development & Support | Meeting: Client Meeting - US | 1h
 ```
 
-**Declined events**: Skip events with strikethrough/dimmed appearance (user declined). **All-day events**: Ignore for time entries (they're reminders, not meetings).
+**Declined events**: skip events flagged as `is_declined`. **All-day events**: ignore events flagged as `is_all_day` (they're reminders, not meetings).
 
-#### Step 5: Validate Durations
+#### Step 3: Validate Durations
 
 Compare calendar durations against note durations and flag discrepancies:
 
@@ -205,7 +164,7 @@ Compare calendar durations against note durations and flag discrepancies:
 - All-day events are reminders, not meetings — ignore for duration
 - Events the user declined (strikethrough) should be excluded entirely
 
-#### Step 6: Enhance Descriptions
+#### Step 4: Enhance Descriptions
 
 **Improve meeting descriptions** when calendar data provides more context:
 
@@ -223,7 +182,7 @@ Compare calendar durations against note durations and flag discrepancies:
 - For recurring meetings, note any distinguishing details from this specific instance
 - Combine with GitHub context when applicable (e.g., meeting + PR demo)
 
-#### Step 7: Time Gap Analysis
+#### Step 5: Time Gap Analysis
 
 Use calendar events + GitHub commits to build a picture of the full workday:
 
