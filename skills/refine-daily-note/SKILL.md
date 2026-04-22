@@ -45,25 +45,16 @@ This gives you the full entity catalog to match against the daily note text in l
 
 ### Phase 1b: Slack Activity Scan
 
-**Always run this phase.** If Slack tools are unavailable, skip gracefully with no error.
+**USE CAPABILITY (optional): read-slack-activity**
+Fetch Slack activity for the target date. Pass the user ID `U07J89FDWPJ`, the vault root, and the time entries parsed from the daily note.
 
-1. **Load Slack tools**: Use whatever Slack capability is available in the current harness. If no Slack tools are available, skip this phase with no error — but always attempt it first.
-2. **Search for user's messages** on the target date using `slack_search_public_and_private`:
-   - Query: `from:<@U07J89FDWPJ> on:{date}`
-3. **Group messages** by channel and 30-minute time windows.
-4. **Build a time coverage map** from existing daily note time entries (start times, durations, projects).
-5. **Identify gaps**: time windows with 3+ Slack messages but no matching time entry.
-6. **Detect huddles**: For each DM or group DM channel found in step 2, read messages around the activity window using `slack_read_channel` with `oldest`/`latest` timestamps. Look for messages from Slackbot containing `"A huddle started"`.
-   - Slack's search API does **not** index huddle system messages — they can only be found by reading the channel directly.
-   - When a huddle is found, record:
-     - **Start time**: the Slackbot message timestamp
-     - **Participants**: inferred from the DM/group DM members (the channel context)
-     - **Estimated duration**: gap between the huddle start and the next human message in the channel (rough estimate — Slack does not expose huddle duration via API)
-   - Huddles should **always** have a corresponding time entry. Flag any huddle that doesn't match an existing entry.
-7. **Infer channel→project mapping** from channel names and existing time entries:
-   - Check cached mappings in `$VAULT/.cache/om/intervals-cache/slack-mappings.md`
-   - If a new channel→project mapping is discovered, append it to the cache file
-8. **Present findings**:
+If the capability returns `available: false`, skip this phase and Phase 1c silently.
+
+Using the returned activity data:
+
+1. **Review uncovered gaps**: channels with Slack activity but no matching time entry.
+2. **Review huddles**: flag any huddles without corresponding time entries.
+3. **Present findings**:
    > Slack activity not covered by time entries:
    > - **#technomic-dev** (2:30-3:15pm, 8 messages): discussed vector search PR issues → [[Technomic]]?
    > - **#exsq-general** (4:00-4:20pm, 4 messages): coordinated with team on AI Upskill → [[EXSQ]]?
@@ -72,7 +63,8 @@ This gives you the full entity catalog to match against the daily note text in l
    > Huddles detected:
    > - **DM with [[Sol Parrot|Sol]]** (12:16pm, ~1h54m): matches `[[EXSQ]] - 1:1 sync with Sol - 2` ✓
    > - **DM with [[Adam Herrneckar|Adam]]** (3:05pm, ~25m): no matching time entry — add one?
-9. **If approved**, suggest time entry lines but do **NOT** auto-insert into time entries — present them for the user to manually add (time entries are sacred structured data).
+4. **If approved**, suggest time entry lines but do **NOT** auto-insert into time entries — present them for the user to manually add (time entries are sacred structured data).
+5. **Persist new mappings**: if the capability returned `new_mappings`, append them to `.cache/om/intervals-cache/slack-mappings.md`.
 
 ### Phase 1c: Slack Activity Summary
 
