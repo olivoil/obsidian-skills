@@ -1,5 +1,6 @@
 ---
 name: refine-daily-note
+type: workflow
 description: Improve Obsidian daily notes — polish writing, add missing wikilinks, extract long sections into dedicated notes, suggest new vault entities, summarize Slack and GitHub activity, and enrich person notes from meetings. Use when asked to clean up a daily note, polish writing, add wikilinks, or enrich note context.
 ---
 
@@ -37,38 +38,23 @@ When invoked with `--auto` (e.g., `refine-daily-note --auto` or `refine-daily-no
 
 ### Phase 1: Discover Vault Entities
 
-Build a catalog of all known entities so you can match them against the daily note text. Prefer Obsidian CLI discovery when available, but fall back to direct filesystem reads whenever needed.
+**USE CAPABILITY: discover-vault-entities**
+Pass the resolved vault root from Phase 0. Request all entity types.
 
-1. **Projects**: list files in `Projects/` and extract project names from filenames
-2. **People**: list files in `Persons/`. If frontmatter aliases are available, read them from each person note
-3. **Topics**: list files in `Topics/` and extract topic names from filenames
-4. **Coding sessions**: list files in `Coding/` for cross-reference awareness
-5. **Meetings**: list files in `Meetings/` for cross-reference awareness
-6. **Tags**: if the Obsidian CLI can return tag data, use it; otherwise skip tag discovery quietly
-
-This gives you the full entity catalog to match against the daily note.
+This gives you the full entity catalog to match against the daily note text in later phases (wikilinks, entity suggestions, Slack/GitHub summaries).
 
 ### Phase 1b: Slack Activity Scan
 
-**Always run this phase.** If Slack tools are unavailable, skip gracefully with no error.
+**USE CAPABILITY (optional): read-slack-activity**
+Fetch Slack activity for the target date. Pass the user ID `U07J89FDWPJ`, the vault root, and the time entries parsed from the daily note.
 
-1. **Load Slack tools**: Use whatever Slack capability is available in the current harness. If no Slack tools are available, skip this phase with no error — but always attempt it first.
-2. **Search for user's messages** on the target date using `slack_search_public_and_private`:
-   - Query: `from:<@U07J89FDWPJ> on:{date}`
-3. **Group messages** by channel and 30-minute time windows.
-4. **Build a time coverage map** from existing daily note time entries (start times, durations, projects).
-5. **Identify gaps**: time windows with 3+ Slack messages but no matching time entry.
-6. **Detect huddles**: For each DM or group DM channel found in step 2, read messages around the activity window using `slack_read_channel` with `oldest`/`latest` timestamps. Look for messages from Slackbot containing `"A huddle started"`.
-   - Slack's search API does **not** index huddle system messages — they can only be found by reading the channel directly.
-   - When a huddle is found, record:
-     - **Start time**: the Slackbot message timestamp
-     - **Participants**: inferred from the DM/group DM members (the channel context)
-     - **Estimated duration**: gap between the huddle start and the next human message in the channel (rough estimate — Slack does not expose huddle duration via API)
-   - Huddles should **always** have a corresponding time entry. Flag any huddle that doesn't match an existing entry.
-7. **Infer channel→project mapping** from channel names and existing time entries:
-   - Check cached mappings in `$VAULT/.cache/om/intervals-cache/slack-mappings.md`
-   - If a new channel→project mapping is discovered, append it to the cache file
-8. **Present findings**:
+If the capability returns `available: false`, skip this phase and Phase 1c silently.
+
+Using the returned activity data:
+
+1. **Review uncovered gaps**: channels with Slack activity but no matching time entry.
+2. **Review huddles**: flag any huddles without corresponding time entries.
+3. **Present findings**:
    > Slack activity not covered by time entries:
    > - **#technomic-dev** (2:30-3:15pm, 8 messages): discussed vector search PR issues → [[Technomic]]?
    > - **#exsq-general** (4:00-4:20pm, 4 messages): coordinated with team on AI Upskill → [[EXSQ]]?
@@ -77,7 +63,8 @@ This gives you the full entity catalog to match against the daily note.
    > Huddles detected:
    > - **DM with [[Sol Parrot|Sol]]** (12:16pm, ~1h54m): matches `[[EXSQ]] - 1:1 sync with Sol - 2` ✓
    > - **DM with [[Adam Herrneckar|Adam]]** (3:05pm, ~25m): no matching time entry — add one?
-9. **If approved**, suggest time entry lines but do **NOT** auto-insert into time entries — present them for the user to manually add (time entries are sacred structured data).
+4. **If approved**, suggest time entry lines but do **NOT** auto-insert into time entries — present them for the user to manually add (time entries are sacred structured data).
+5. **Persist new mappings**: if the capability returned `new_mappings`, append them to `.cache/om/intervals-cache/slack-mappings.md`.
 
 ### Phase 1c: Slack Activity Summary
 
@@ -108,32 +95,26 @@ If no Slack messages were found in Phase 1b, or Slack MCP tools were unavailable
 
 ### Phase 1d: GitHub Activity Scan
 
-**Always attempt this phase.** If `gh` is unavailable, not authenticated, or returns no useful data, skip gracefully with no error.
+**USE CAPABILITY (optional): read-github-activity**
+Fetch activity for the target date. If the capability returns `available: false`, skip this phase and Phase 1e silently.
 
-1. Run:
-   ```bash
-   bash scripts/fetch-github-activity.sh {date}
-   ```
-   This returns JSON for:
-   - PRs authored on the date
-   - PRs active/updated on the date
-   - PRs reviewed on the date
-   - event-level activity (pushes, comments, reviews, issue/PR actions)
-2. Build a repo→project correlation map using:
+Using the returned activity data:
+
+1. Build a repo→project correlation map using:
    - `.cache/om/intervals-cache/github-mappings.md`
    - project names already present in the day's time entries
    - explicit repo links already mentioned in the daily note
-3. Identify the day's meaningful GitHub work:
+2. Identify the day's meaningful GitHub work:
    - authored PRs
    - reviewed PRs
    - notable pushes or comment/review bursts
    - repos with concentrated activity even if the daily note only mentions them vaguely
-4. Improve weak note context when GitHub data clarifies it. Examples:
+3. Improve weak note context when GitHub data clarifies it. Examples:
    - `worked on OIDC stuff` → mention the PR title or repo involved
    - `reviewed PRs` → list the most important PRs/repositories reviewed
    - `pipeline work` → mention the repo and PR title when available
-5. Infer or extend repo→project mappings when the association is clear, then append new mappings to `.cache/om/intervals-cache/github-mappings.md`.
-6. Do **not** rewrite time-entry lines automatically. Use GitHub activity to enrich the prose sections of the daily note, not to mutate the structured time-entry block.
+4. Infer or extend repo→project mappings when the association is clear, then append new mappings to `.cache/om/intervals-cache/github-mappings.md`.
+5. Do **not** rewrite time-entry lines automatically. Use GitHub activity to enrich the prose sections of the daily note, not to mutate the structured time-entry block.
 
 ### Phase 1e: GitHub Activity Summary
 

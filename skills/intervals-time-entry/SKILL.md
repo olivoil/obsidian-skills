@@ -1,5 +1,6 @@
 ---
 name: intervals-time-entry
+type: workflow
 description: Prepare and fill Intervals Online time-entry rows from daily notes with GitHub and Outlook calendar correlation. Use when asked to prepare or fill Intervals hours for manual review. The assistant must show the proposed entries and hours before filling, let the user tweak them, require explicit confirmation to proceed, and never click Save or submit the timesheet.
 ---
 
@@ -22,6 +23,7 @@ Prepare and fill time entries in Intervals Online from Obsidian daily notes usin
 ├── project-mappings.md         # Project→workType mappings
 ├── github-mappings.md          # Repo→project mappings
 ├── outlook-mappings.md         # Calendar→project mappings
+├── worktype-mappings.md        # Activity language→work type fallback
 ```
 
 These files persist between sessions. Seed them from this repo's templates on first install, then treat them as shared runtime state for both Claude and Codex.
@@ -55,17 +57,10 @@ Look for:
 
 #### Step 1: Fetch Activity
 
-**Run this command** (replace YYYY-MM-DD with the target date):
-```bash
-bash scripts/fetch-github-activity.sh YYYY-MM-DD
-```
+**USE CAPABILITY: read-github-activity**
+Fetch activity for the target date.
 
-This returns JSON with:
-- PRs authored (created or updated)
-- PRs reviewed
-- Events with timestamps (commits, reviews, comments)
-
-**IMPORTANT**: The script output already includes PR titles and body snippets in `prs_authored`, `prs_active`, and `prs_reviewed`. Do NOT make separate `gh pr view` calls — use the data already returned by the script.
+The capability returns structured JSON with PRs authored, PRs reviewed, and timestamped events. PR titles and body snippets are already included — do NOT make separate `gh pr view` calls.
 
 #### Step 2: Correlate with Notes
 
@@ -121,66 +116,25 @@ Example output:
 
 ### Phase 1.7: Outlook Calendar Correlation (REQUIRED)
 
-**ALWAYS run this phase** to visually read the Outlook calendar and cross-reference with notes and GitHub activity.
+**USE CAPABILITY: read-outlook-calendar**
+Fetch calendar events for the target date.
 
-**Prerequisite**: User must be logged into Outlook Web in the browser (same Chrome instance with `--remote-debugging-port=9222`).
+**ALWAYS run this phase.** If the capability returns `available: false`, warn the user and continue without calendar data.
 
-#### Step 1: Find or Open Outlook Web Tab
+Using the returned calendar events, correlate with notes and GitHub data:
 
-**IMPORTANT**: Never navigate away from the user's current tab. Always find an existing Outlook tab or create a new one.
+#### Step 1: Correlate with Notes and GitHub
 
-1. Call `list_pages` to see all open browser tabs
-2. Look for a tab with URL containing `outlook.office.com` or `outlook.live.com`
-3. If found: call `select_page` with that page's ID
-4. If NOT found: call `new_page` with the day view URL (see Step 2)
+1. **Match meetings to time entries**: if notes mention a meeting that appears in the calendar, link them
+2. **Infer project from attendees**: use `.cache/om/intervals-cache/people-context.md` to determine which project a meeting belongs to
+3. **Infer project from subject**: match calendar subjects against `project-mappings.md` terms
+4. **Learn calendar mappings**: when a calendar event clearly maps to a project, add to `.cache/om/intervals-cache/outlook-mappings.md`
 
-#### Step 2: Navigate, Verify, and Extract Calendar Data
-
-**Navigate** to the target date's day view:
-
-```
-https://outlook.office.com/calendar/view/day/YYYY/M/D
-```
-
-Note: month and day are **not zero-padded** (e.g., `2026/2/16` not `2026/02/16`).
-
-- If the tab is already on Outlook but wrong date: call `navigate_page` with the day view URL
-- If a new tab was created in Step 1: it will already be on the correct URL
-
-**Verify the date** — immediately after navigation, call `take_screenshot` and confirm the calendar is showing the correct date. The date header is visible at the top of the day view.
-
-- If the screenshot shows the **wrong date**: wait 3 seconds, then call `navigate_page` again with the same URL. Take another screenshot to verify.
-- If still wrong after retry: try the alternative URL format with zero-padded month/day (e.g., `2026/02/04` instead of `2026/2/4`). Take a screenshot to verify.
-- **Only proceed once the correct date is confirmed** in the screenshot.
-
-**Extract calendar data** visually from the verified screenshot:
-
-- **Meeting subjects** — the text on each calendar block
-- **Start and end times** — from the time labels on the left axis and block positions
-- **Duration** — calculated from start/end times
-- **Declined events** — shown with strikethrough text or dimmed/crossed-out appearance
-- **All-day events** — shown in the top banner area (above the hourly grid)
-- **Attendee names** — visible if shown in the calendar block
-- **Location** — if visible in the calendar block
-
-If the calendar is zoomed out and events are hard to read, note which events need clarification and proceed with what's visible.
-
-**CRITICAL**: Use `take_screenshot` for visual reading — do NOT use `take_snapshot`, DOM inspection, or click-based navigation for calendar data extraction. The entire point of this phase is visual analysis without brittle DOM dependencies. If the screenshot is unclear, take another screenshot — never fall back to DOM snapshots or clicking calendar elements.
-
-#### Step 2: Correlate with Notes and GitHub
-
-Using the visually extracted calendar data, cross-reference with notes and GitHub data:
-
-1. **Match meetings to time entries**: If notes mention a meeting that appears in the calendar, link them
-2. **Infer project from attendees**: Use `.cache/om/intervals-cache/people-context.md` to determine which project a meeting belongs to
-3. **Infer project from subject**: Match calendar subjects against `project-mappings.md` terms
-4. **Learn calendar mappings**: When a calendar event clearly maps to a project, add to `.cache/om/intervals-cache/outlook-mappings.md`
-
-#### Step 4: Detect Missing Entries
+#### Step 2: Detect Missing Entries
 
 Compare calendar events against notes and flag gaps:
 
-**Missing time entries**: If the calendar shows a meeting but notes have no corresponding entry, suggest adding one.
+**Missing time entries**: if the calendar shows a meeting but notes have no corresponding entry, suggest adding one.
 
 ```
 📅 Calendar shows "Technomic-EXSQ Weekly Touchbase" (11:00-12:00, 1h)
@@ -188,9 +142,9 @@ Compare calendar events against notes and flag gaps:
    Suggest: Ignite Application Development & Support | Meeting: Client Meeting - US | 1h
 ```
 
-**Declined events**: Skip events with strikethrough/dimmed appearance (user declined). **All-day events**: Ignore for time entries (they're reminders, not meetings).
+**Declined events**: skip events flagged as `is_declined`. **All-day events**: ignore events flagged as `is_all_day` (they're reminders, not meetings).
 
-#### Step 5: Validate Durations
+#### Step 3: Validate Durations
 
 Compare calendar durations against note durations and flag discrepancies:
 
@@ -211,7 +165,7 @@ Compare calendar durations against note durations and flag discrepancies:
 - All-day events are reminders, not meetings — ignore for duration
 - Events the user declined (strikethrough) should be excluded entirely
 
-#### Step 6: Enhance Descriptions
+#### Step 4: Enhance Descriptions
 
 **Improve meeting descriptions** when calendar data provides more context:
 
@@ -229,7 +183,7 @@ Compare calendar durations against note durations and flag discrepancies:
 - For recurring meetings, note any distinguishing details from this specific instance
 - Combine with GitHub context when applicable (e.g., meeting + PR demo)
 
-#### Step 7: Time Gap Analysis
+#### Step 5: Time Gap Analysis
 
 Use calendar events + GitHub commits to build a picture of the full workday:
 
@@ -249,14 +203,34 @@ This gap analysis helps:
 - Identify development blocks between meetings
 - Suggest time allocations for unaccounted gaps
 
+### Phase 1.8: Discover Vault Entities
+
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects` and `people` types.
+
+Use the entity catalog to:
+- Correlate GitHub repos to project names in Phase 1.5
+- Match calendar attendees to person notes in Phase 1.7
+- Validate project names before mapping resolution in Phase 2
+
 ### Phase 2: Load Mappings
 
-1. **Read project cache**: `.cache/om/intervals-cache/project-mappings.md` (in the project root)
-2. **Read GitHub mappings cache**: `.cache/om/intervals-cache/github-mappings.md` (learned repo→project associations)
-3. **Read Outlook mappings cache**: `.cache/om/intervals-cache/outlook-mappings.md` (learned calendar→project associations)
-4. **Read defaults from `references/worktype-mappings.md` and shared state from `.cache/om/intervals-cache/people-context.md`**
+**USE CAPABILITY: resolve-mappings**
+Load mapping types: `project`, `github`, `outlook`, `people`, `worktype`.
 
-If shared cache files are missing, bootstrap them with this repo's install script before running the workflow.
+Use the loaded mappings to:
+- Resolve project→workType for each time entry (Phase 3)
+- Correlate GitHub repos to projects (from Phase 1.5 data)
+- Match Outlook calendar events to projects (from Phase 1.7 data)
+- Look up attendee→project associations from people context
+- Translate activity language in the time entry description into the correct Intervals work type (from worktype mappings)
+
+**Work type resolution order** — apply these layers in sequence, each refining the previous:
+1. **Project mappings** determine which project and which work types are *available* for that project
+2. **Worktype mappings** match the activity description (e.g., "standup", "PR reviews", "deployment") to select the *right* work type from the available set. If the description doesn't match any worktype term, fall back to the project's default work type.
+3. **GitHub/Outlook mappings** provide additional refinement for entries sourced from those signals (e.g., "PR authored → Development - US", calendar event with explicit work type)
+
+The final work type must exist in the project's cached work type list. If it doesn't, flag the entry for user review in Phase 3.5.
 
 Output format: `Project | Module (if applicable) | Work Type | Hours | Description`
 
@@ -267,9 +241,11 @@ This is the preview table you must show the user before filling anything in Inte
 - If no specific module applies, **omit the module field** — the fill script will automatically select "No Module"
 - The script detects the Module dropdown at runtime; projects without it are unaffected
 
+If shared cache files are missing, bootstrap them with this repo's install script before running the workflow.
+
 ### Phase 3: Validate Against Cache
 
-Check the project cache for work types:
+Using the mappings from Phase 2, check each time entry's project has cached work types:
 - If all projects have cached work types → skip browser inspection
 - If any project is NOT cached → inspect browser to discover its work types
 
@@ -345,43 +321,26 @@ This ensures future runs skip inspection for this project, saving time and token
 
 ### Phase 5.5: Update GitHub Mappings Cache
 
-When you discover a new repo→project association (from PR links in notes or inferred from context):
+When you discover a new repo→project association:
 
-1. Read the current cache: `.cache/om/intervals-cache/github-mappings.md`
-2. Add the mapping to the table:
-
-```markdown
-| owner/repo-name | Intervals Project Name |
-```
-
-3. Write the updated file back
-
-This helps future correlation work more accurately by remembering which repos belong to which projects.
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `github`, add the `owner/repo → Intervals Project` row.
 
 ### Phase 5.6: Update Outlook Mappings Cache
 
-When you discover a new calendar event→project association (from subject matching, attendee inference, or user confirmation):
+When you discover a new calendar event→project association:
 
-1. Read the current cache: `.cache/om/intervals-cache/outlook-mappings.md`
-2. Add the mapping to the appropriate table:
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
 
-For subject→project mappings:
-```markdown
-| Calendar Subject Pattern | Intervals Project | Work Type |
-|--------------------------|-------------------|-----------|
-| Technomic-EXSQ Weekly Touchbase | Ignite Application Development & Support | Meeting: Client Meeting - US |
-```
+### Phase 5.7: Update Work Type Mappings Cache
 
-For recurring meeting mappings:
-```markdown
-| Meeting Name | Intervals Project | Work Type |
-|-------------|-------------------|-----------|
-| Technomic Scrum | Ignite Application Development & Support | Meeting: Internal Stand Up - US |
-```
+When the user corrects a work type during the Phase 3.5 preview and the correction follows a pattern that should apply generally (e.g., "retro" should always map to "Meeting: Internal Working Session - US"):
 
-3. Write the updated file back
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `worktype`, add the new `Notes Term → Intervals Work Type` row.
 
-This helps future runs instantly map recurring meetings to the correct project and work type.
+Only learn general activity terms — not project-specific overrides (those belong in `project-mappings.md`).
 
 ### Phase 6: Verify Filled Rows
 
@@ -391,47 +350,20 @@ Take screenshot to confirm the filled rows are correct.
 
 ### Phase 7: Write Time Entry Table to Daily Note
 
-After verification, write the finalized entries back to the Obsidian daily note as a permanent record.
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### Intervals`
+- **content**: the markdown table built from ENTRIES data:
+  ```markdown
+  | Project | Hours | Description |
+  |---------|------:|-------------|
+  | {project} | {hours} | {description} |
+  | **Total** | **{sum}** | |
+  ```
+- **position_hint**: `before:### Coding Sessions` (fall back to `after:### Done today`, then `end`)
+- **separator**: `------`
 
-#### Step 1: Resolve Vault Path
-
-Read `$OBSIDIAN_VAULT_PATH` from the environment. The daily note is at:
-```
-$OBSIDIAN_VAULT_PATH/Daily Notes/YYYY-MM-DD.md
-```
-
-#### Step 2: Read the Daily Note
-
-Read the daily note file to find the insertion point.
-
-#### Step 3: Insert or Replace the Intervals Section
-
-Look for an existing `### Intervals` section:
-- **If found**: Replace the entire section (from `### Intervals` to the next `###` or `---` or end of file) with the updated table
-- **If not found**: Insert the section using this priority:
-  1. Before `### Coding Sessions` if it exists
-  2. After `### Open todos` (before the next `###` or `---`)
-  3. After `### Done today` if `### Open todos` doesn't exist
-  4. At the end of the note if none of the above exist
-
-#### Step 4: Write the Table
-
-Format as a markdown table with a horizontal rule before it:
-
-```markdown
-------
-### Intervals
-| Project | Hours | Description |
-|---------|------:|-------------|
-| Ignite Application Development & Support | 2 | Weekly touchbase with Technomic |
-| EWG Feature Enhancement Addendum | 3.5 | Add pagination endpoint (PR #574) |
-| **Total** | **5.5** | |
-```
-
-- Use the same ENTRIES data that was sent to `fill-entries.js`
-- Right-align the Hours column
-- Add a bold **Total** row summing all hours
-- The `------` separator goes before `### Intervals` to visually separate it from the section above
+Use the same ENTRIES data that was sent to `fill-entries.js`. Right-align Hours column. Add bold Total row.
 
 ### Phase 8: Insert into SQLite Database
 

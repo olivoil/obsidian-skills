@@ -1,5 +1,6 @@
 ---
 name: transcribe-meeting
+type: workflow
 description: Transcribe a meeting recording from the Rodecaster SD card, Google Drive, or a local file. Creates a meeting note with summary, decisions, and action items, plus an MP3 archive. Use when asked to transcribe a meeting recording into the vault.
 ---
 
@@ -106,6 +107,11 @@ If the input is a local file path, use it directly.
 ### Phase 1.5: Gather Context
 
 Before transcription, gather participant names and project vocabulary to improve whisper accuracy and action item attribution. Run the three tracks below **in parallel** to minimize added time.
+
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `projects`, `people`, and `meetings` types.
+
+Use the people catalog to match participant names from screenshots (Track 1) to existing vault person notes. Use the project catalog to build the whisper prompt vocabulary.
 
 **Track 1: Screenshots (authoritative for participants)**
 

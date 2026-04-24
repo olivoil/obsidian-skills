@@ -1,5 +1,6 @@
 ---
 name: topic-pulse
+type: workflow
 description: Research recently active topics from the vault and deepen topic notes with concept documentation, subtopic exploration, and selective fresh context. Use when you want Topics notes expanded from recent vault activity.
 ---
 
@@ -38,11 +39,14 @@ The output should not be just a thin news-style pulse. The main job is to identi
 
 ### Phase 1: Select candidate topics
 
+**USE CAPABILITY: discover-vault-entities**
+Pass the vault root. Request `topics` and `projects` types.
+
 Build a candidate list from:
 - explicit topic names named by the user
-- existing wikilinks to `Topics/` notes in recent notes
+- existing wikilinks to `Topics/` notes in recent notes (cross-reference against the entity catalog)
 - recent notes in `Clippings/`, `Projects/`, `Coding/`, `Meetings/`, `Topics/`, and `Daily Notes/`
-- repeated unlinked topic phrases that appear important in recent work
+- repeated unlinked topic phrases that appear important in recent work — verify against the entity catalog using QMD before treating as new
 - clusters of notes that imply a broader topic needing better structure
 
 Then rank candidates by relevance. Prefer topics that are:

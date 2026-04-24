@@ -1,5 +1,6 @@
 ---
 name: session-rollup
+type: workflow
 description: Summarize recent work from Engram memory into an Obsidian coding note and link it from the daily note. Use when wrapping up a coding session or when asked to sync recent project work into the vault.
 ---
 
@@ -95,16 +96,17 @@ Omit any empty section.
 
 ### 4. Link from the daily note
 
-1. Read the relevant daily note.
-2. Create it if missing.
-3. Insert or update a `### Coding Sessions` section.
-4. Add a bullet linking to the new coding note with the one-line summary.
+1. Read the daily note and check if a `### Coding Sessions` section already exists.
+2. If it exists, read its current bullets. Build **content** by appending the new bullet to the existing entries.
+3. If it does not exist, **content** is just the new bullet.
 
-Preferred bullet format:
-
-```markdown
-- [[{date}--{repo-name}--{branch}]] - {one-line summary}
-```
+**USE CAPABILITY: write-vault-section**
+- **note_path**: `Daily Notes/{date}.md`
+- **section_heading**: `### Coding Sessions`
+- **content**: all existing bullets (if any) plus the new one:
+  `- [[{date}--{repo-name}--{branch}]] - {one-line summary}`
+- **position_hint**: `end`
+- **create_if_missing**: true
 
 ### 5. Confirm
 
