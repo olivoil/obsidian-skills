@@ -23,6 +23,7 @@ Prepare and fill time entries in Intervals Online from Obsidian daily notes usin
 ├── project-mappings.md         # Project→workType mappings
 ├── github-mappings.md          # Repo→project mappings
 ├── outlook-mappings.md         # Calendar→project mappings
+├── worktype-mappings.md        # Activity language→work type fallback
 ```
 
 These files persist between sessions. Seed them from this repo's templates on first install, then treat them as shared runtime state for both Claude and Codex.
@@ -215,13 +216,21 @@ Use the entity catalog to:
 ### Phase 2: Load Mappings
 
 **USE CAPABILITY: resolve-mappings**
-Load mapping types: `project`, `github`, `outlook`, `people`.
+Load mapping types: `project`, `github`, `outlook`, `people`, `worktype`.
 
 Use the loaded mappings to:
 - Resolve project→workType for each time entry (Phase 3)
 - Correlate GitHub repos to projects (from Phase 1.5 data)
 - Match Outlook calendar events to projects (from Phase 1.7 data)
 - Look up attendee→project associations from people context
+- Translate activity language in the time entry description into the correct Intervals work type (from worktype mappings)
+
+**Work type resolution order** — apply these layers in sequence, each refining the previous:
+1. **Project mappings** determine which project and which work types are *available* for that project
+2. **Worktype mappings** match the activity description (e.g., "standup", "PR reviews", "deployment") to select the *right* work type from the available set. If the description doesn't match any worktype term, fall back to the project's default work type.
+3. **GitHub/Outlook mappings** provide additional refinement for entries sourced from those signals (e.g., "PR authored → Development - US", calendar event with explicit work type)
+
+The final work type must exist in the project's cached work type list. If it doesn't, flag the entry for user review in Phase 3.5.
 
 Output format: `Project | Module (if applicable) | Work Type | Hours | Description`
 
@@ -323,6 +332,15 @@ When you discover a new calendar event→project association:
 
 **USE CAPABILITY: resolve-mappings**
 Learn new mapping: type `outlook`, add the subject pattern or recurring meeting mapping.
+
+### Phase 5.7: Update Work Type Mappings Cache
+
+When the user corrects a work type during the Phase 3.5 preview and the correction follows a pattern that should apply generally (e.g., "retro" should always map to "Meeting: Internal Working Session - US"):
+
+**USE CAPABILITY: resolve-mappings**
+Learn new mapping: type `worktype`, add the new `Notes Term → Intervals Work Type` row.
+
+Only learn general activity terms — not project-specific overrides (those belong in `project-mappings.md`).
 
 ### Phase 6: Verify Filled Rows
 

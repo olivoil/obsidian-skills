@@ -18,6 +18,7 @@ Load mapping files from `.cache/om/intervals-cache/`, apply them to input data, 
   - `slack` — channel→project mappings (`slack-mappings.md`)
   - `freshbooks` — Intervals project→FreshBooks project mappings (`freshbooks-mappings.md`)
   - `people` — person metadata (`people-context.md`)
+  - `worktype` — activity language→work type fallback mappings (`worktype-mappings.md`)
 - **data_to_map** (optional): list of items to resolve against the mappings. If provided, the capability applies the mappings and returns resolved results. If omitted, just returns the raw mapping tables.
 
 ## Process
@@ -38,6 +39,7 @@ Load mapping files from `.cache/om/intervals-cache/`, apply them to input data, 
    - For `slack` mappings: match channel names against mapped channels
    - For `freshbooks` mappings: match Intervals project names (CONTAINS) to FreshBooks project + note
    - For `people` mappings: match person names against the context file
+   - For `worktype` mappings: match activity descriptions from the time entry against known terms (e.g., "standup" → Meeting: Internal Stand Up - US, "PR reviews" → Architecture/Technical Design - US). Use as a **fallback** after project-specific mappings — if the project mapping already resolved a work type, skip; if the entry only has an activity description, use the worktype table to infer it. Context-based rules (e.g., "meeting with client stakeholders" → Client Meeting) apply when the notes term table has no exact match.
 
 3. **Flag unmapped items**: if any input items don't match a mapping, flag them for the caller to handle (ask user, skip, etc.)
 
@@ -84,3 +86,12 @@ Channel name→project mappings.
 
 ### people-context.md
 Person metadata with project associations.
+
+### worktype-mappings.md
+```markdown
+| Notes Term | Intervals Work Type |
+|------------|---------------------|
+| standup, standup meeting, daily standup | Meeting: Internal Stand Up - US |
+| PR review, code review | Architecture/Technical Design - US |
+```
+Plus a context-based selection table for ambiguous scenarios.
