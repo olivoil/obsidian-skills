@@ -1,10 +1,10 @@
-# obsidian-skills
+# skills
 
-Cross-agent skills for maintaining my personal Obsidian vault.
+Cross-agent skills. The repo currently has an `obsidian` namespace for maintaining my personal Obsidian vault and an `engineering` namespace for recurring software-engineering workflows.
 
 This repo is public. My vault is not.
 
-These skills are how I use agents like Claude Code and Codex to help maintain the vault I actually work out of: refining daily notes, generating weekly rollups, transcribing meetings, enriching topic notes, and reconciling time-tracking data with external systems.
+The Obsidian skills are how I use agents like Claude Code and Codex to help maintain the vault I actually work out of: refining daily notes, generating weekly rollups, transcribing meetings, enriching topic notes, and reconciling time-tracking data with external systems.
 
 They are not meant to be a universal Obsidian framework. They encode *my* workflow and assumptions first, but I am publishing them because the overall pattern may still be useful to adapt.
 
@@ -21,11 +21,11 @@ A typical week looks something like this:
 - At the end of the week, I generate a **weekly rollup** that summarizes time, meetings, decisions, and open work.
 - Some of that information also needs to be reconciled with systems like **Intervals** and **FreshBooks**. I use Intervals to log work time and FreshBooks for billing/invoicing, so a few skills bridge the vault with those systems.
 
-The goal of these skills is not just to automate text editing. The goal is to help keep Obsidian accurate, navigable, and useful as a long-term knowledge base.
+The goal of the Obsidian skills is not just to automate text editing. The goal is to help keep Obsidian accurate, navigable, and useful as a long-term knowledge base.
 
 ## Vault assumptions
 
-These skills assume a vault structure roughly like this:
+The Obsidian skills assume a vault structure roughly like this:
 
 ```text
 Daily Notes/
@@ -47,6 +47,8 @@ Some skills are more opinionated than others. In particular:
 If your vault uses different folder names or a different note model, expect to adapt the skills.
 
 ## Included skills
+
+The Obsidian skills live under `skills/obsidian/` for repo organization. They intentionally install with flat skill names, matching the style of use-case grouped skills repos such as Matt Pocock's skills repo.
 
 ### `refine-daily-note`
 Improve a daily note by polishing writing, adding missing links, extracting longer sections when appropriate, and enriching related vault context from Slack and GitHub activity.
@@ -72,6 +74,19 @@ Sync Intervals data from local SQLite state into FreshBooks without re-reading e
 ### `topic-pulse`
 Research recently active topics from recent notes across the vault, then deepen `Topics/` notes with concept documentation, subtopic exploration, and selective fresh context.
 
+### `setup-obsidian-skills`
+Initialize or repair the shared `.cache/om` runtime state used by these skills, including migration from the older Claude-only cache layout.
+
+## Engineering skills
+
+Engineering skills live under `skills/engineering/` and also install with flat names.
+
+### `pr-review`
+Review GitHub pull requests or local branches with a project-agnostic, high-signal code review workflow. Supports chat-only local reviews and confirmed inline GitHub review posting.
+
+### `security-incident-response`
+Research disclosed or ongoing security incidents, scan projects for exposure, and produce per-project remediation and hardening plans.
+
 ## Agent model
 
 These skills are designed to work with both **Claude Code** and **Codex**.
@@ -87,11 +102,11 @@ In practice, I usually invoke these skills explicitly:
 - in Claude Code: slash-command style
 - in Codex: `$skill-name`
 
-For Codex, each skill includes `agents/openai.yaml` metadata and disables implicit invocation, because I usually know exactly which skill I want and these skills often write to the vault or external systems.
+Some Obsidian workflow skills include `agents/openai.yaml` metadata to disable implicit invocation, because I usually know exactly which vault workflow I want and those skills often write to the vault or external systems.
 
 ## Shared runtime state and mutable mappings
 
-These skills expect the consumer repo to hold shared state at:
+The Obsidian skills expect the consumer repo to hold shared state at:
 
 ```text
 .cache/om/
@@ -101,7 +116,8 @@ These skills expect the consumer repo to hold shared state at:
 │   ├── outlook-mappings.md
 │   ├── slack-mappings.md
 │   ├── people-context.md
-│   └── freshbooks-mappings.md
+│   ├── freshbooks-mappings.md
+│   └── worktype-mappings.md
 └── time-entries.db
 ```
 
@@ -157,19 +173,20 @@ Not every skill needs every dependency.
 
 See [INSTALL.md](./INSTALL.md).
 
-The usual local setup is:
+The usual setup is:
 
 ```bash
-./install.sh ~/Code/github.com/olivoil/obsidian
+cd ~/Code/github.com/olivoil/obsidian
+npx skills add olivoil/obsidian-skills --skill '*' --agent codex claude-code
 ```
 
-That installs the skills into the consumer repo for both Claude Code and Codex, creates the shared cache under `.cache/om`, and migrates data from the older Claude-only layout if it exists.
+Then run `$setup-obsidian-skills` once from the vault repo to create the shared cache under `.cache/om` and migrate data from the older Claude-only layout if it exists.
 
 ## Privacy and customization
 
 This repo intentionally ships **templates**, not my real mapping data.
 
-If you install these skills into your own vault, you should expect to customize:
+If you install the Obsidian skills into your own vault, you should expect to customize:
 
 - folder names
 - project mappings
