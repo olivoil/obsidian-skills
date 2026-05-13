@@ -1,67 +1,28 @@
 # Install skills
 
-Install these skills with Vercel's Skills CLI from the consumer repo where you want to use them.
-
-For my Obsidian vault:
+Install with Vercel's Skills CLI from the repo where you want to use skills:
 
 ```bash
-cd ~/Code/github.com/olivoil/obsidian
-npx skills add olivoil/obsidian-skills --skill '*' --agent codex claude-code
+npx skills add olivoil/skills
 ```
+
+The CLI is interactive and lets you choose which skills and agents to install.
 
 For local development from this checkout:
 
 ```bash
-cd ~/Code/github.com/olivoil/obsidian
-npx skills add ~/Code/github.com/olivoil/obsidian-skills --skill '*' --agent codex claude-code
+npx skills add ~/Code/github.com/olivoil/skills
 ```
 
-The skills live in this repo under `skills/obsidian/`, but they intentionally install with flat names such as `refine-daily-note`, `weekly-rollup`, and `setup-obsidian-skills`.
+Group-specific docs:
 
-## First-time vault setup
+- [Obsidian skills](./skills/obsidian/README.md)
+- [Engineering skills](./skills/engineering/README.md)
 
-After installing, run the setup skill from the vault repo:
+## Updating
 
-```text
-$setup-obsidian-skills
-```
-
-The setup skill initializes shared runtime state at:
-
-```text
-.cache/om/
-├── intervals-cache/
-│   ├── project-mappings.md
-│   ├── github-mappings.md
-│   ├── outlook-mappings.md
-│   ├── slack-mappings.md
-│   ├── people-context.md
-│   ├── freshbooks-mappings.md
-│   └── worktype-mappings.md
-└── time-entries.db
-```
-
-By default it preserves existing files and learned mappings. It only overwrites cache templates when you explicitly ask it to reset them.
-
-## Migration from the old Claude-only setup
-
-If your vault already has:
-
-```text
-.claude/intervals-cache/
-.claude/time-entries.db
-```
-
-then `$setup-obsidian-skills` can migrate those files into `.cache/om/`.
-
-The old files are left in place so you can compare during testing.
-
-## Updating skills
-
-From the vault repo:
+From a repo with installed skills:
 
 ```bash
 npx skills update
 ```
-
-or re-run the `add` command above.
