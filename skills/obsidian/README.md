@@ -1,8 +1,8 @@
 # Obsidian skills
 
-Skills for maintaining my personal Obsidian vault: refining daily notes, generating weekly rollups, transcribing meetings, enriching topic notes, and reconciling time-tracking data with external systems.
+Skills for maintaining my Obsidian vault: refining daily notes, generating weekly rollups, transcribing meetings, enriching topic notes, and reconciling time-tracking data with external systems.
 
-They are not meant to be a universal Obsidian framework. They encode my workflow and assumptions first, but the overall pattern may be useful to adapt.
+These skills assume my vault structure, external tools, and note conventions. They may need adaptation for other vaults.
 
 ## Install all Obsidian skills
 

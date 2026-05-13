@@ -1,10 +1,10 @@
 # Engineering skills
 
-General engineering workflow skills. These are not tied to Obsidian and are intended to grow into my own flavor of recurring engineering playbooks.
+Engineering workflow skills for recurring tasks I want to handle consistently. These are not tied to Obsidian.
 
 ## Install
 
-Use the interactive installer from the repo where you want the skills:
+From the repo where you want the skills:
 
 ```bash
 npx skills add olivoil/skills
