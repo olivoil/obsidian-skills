@@ -2,17 +2,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+SKILL_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TARGET_REPO="${1:-$PWD}"
 RESET_CACHE="${2:-}"
 
 CACHE_DIR="$TARGET_REPO/.cache/om"
 INTERVALS_DIR="$CACHE_DIR/intervals-cache"
-TEMPLATE_DIR="$REPO_ROOT/templates/cache/om/intervals-cache"
+TEMPLATE_DIR="$SKILL_ROOT/templates/cache/om/intervals-cache"
 mkdir -p "$INTERVALS_DIR"
 
 if [[ -d "$TARGET_REPO/.claude/intervals-cache" || -f "$TARGET_REPO/.claude/time-entries.db" ]]; then
-  "$REPO_ROOT/scripts/migrate-state.sh" "$TARGET_REPO" "$RESET_CACHE"
+  "$SKILL_ROOT/scripts/migrate-state.sh" "$TARGET_REPO" "$RESET_CACHE"
 fi
 
 for template in "$TEMPLATE_DIR"/*.md; do
