@@ -1,7 +1,7 @@
 ---
 name: refine-daily-note
 type: workflow
-description: Improve Obsidian daily notes — polish writing, add missing wikilinks, extract long sections into dedicated notes, suggest new vault entities, summarize Slack and GitHub activity, and enrich person notes from meetings. Use when asked to clean up a daily note, polish writing, add wikilinks, or enrich note context.
+description: Improve Obsidian daily notes — polish writing, add missing wikilinks, extract long sections into dedicated notes, suggest new vault entities, summarize Slack and GitHub activity, enrich person notes from meetings, and maintain project people lists. Use when asked to clean up a daily note, polish writing, add wikilinks, or enrich note context.
 ---
 
 # Refine Daily Notes
@@ -13,13 +13,13 @@ Improve an Obsidian daily note by polishing prose, adding missing wikilinks to m
 When invoked with `--auto` (e.g., `refine-daily-note --auto` or `refine-daily-note 2026-02-14 --auto`), the skill runs fully unattended with no confirmation prompts. This is designed for unattended scheduled execution as well as interactive use.
 
 **In auto mode:**
-- **Apply without asking**: Phases 0-3 (setup, entity discovery, Slack scan + summary, GitHub scan + summary, prose improvements, wikilinks), Phase 4d (freeze "Done today"), Phase 6 (project recent activity updates), and Phase 7 (enrich person notes — update existing, create new)
+- **Apply without asking**: Phases 0-3 (setup, entity discovery, Slack scan + summary, GitHub scan + summary, prose improvements, wikilinks), Phase 4d (freeze "Done today"), Phase 6 (project recent activity updates), and Phase 7 (enrich person notes and project people lists — update existing, create new)
 - **Skip entirely**: Phase 4 (extract long sections), Phase 4b (suggest new entities), Phase 4c (suggest todo completions), Phase 4e (move inline todos) — these require human judgment
 - **Phase 1b (Slack)**: Run the scan and write the Slack Activity summary (Phase 1c) directly. Skip the "add time entries?" prompt (step 8-9) — just note uncovered gaps in the Slack Activity section for the user to review later
 - **Phase 1d (GitHub)**: Run the GitHub activity scan and write the GitHub Activity summary (Phase 1e) directly when `gh` is available; skip quietly if GitHub access is unavailable
 - **Phase 5**: Skip the confirmation step — apply prose and wikilink changes directly
 - **Phase 6**: Apply project recent activity updates directly without confirmation
-- **Phase 7**: Update existing person notes directly; create new person files without asking
+- **Phase 7**: Update existing person notes and project people lists directly; create new person files without asking
 - **Commit changes**: After all edits are applied, create a git commit with message `vault backup: refine daily note {date}`
 
 **In interactive mode (default):** Behavior is unchanged — all confirmation prompts remain.
@@ -308,6 +308,7 @@ If no inline todos found, skip this phase silently.
    - Slack/GitHub activity sections added or updated
    - Sections extracted (destination paths)
    - New entities created (paths)
+   - Project people lists updated
 2. **Get user approval** before applying
 3. **Apply changes**: edit the daily note, create any extracted/new entity notes
 4. **Report**: what was changed, what was linked, what was extracted, what was created
@@ -326,9 +327,9 @@ After all daily note changes are applied, update each referenced project's note 
 4. **Present all proposed project note updates** for approval before applying.
 5. **Apply changes** if approved.
 
-### Phase 7: Enrich Person Notes
+### Phase 7: Enrich Person Notes and Project People Lists
 
-After project updates, enrich person notes for anyone who appeared in today's meetings.
+After project updates, enrich person notes for anyone who appeared in today's meetings, then update the corresponding project pages with the reverse people list.
 
 1. **Collect today's meeting notes**: Find all meeting notes linked from the daily note's time entries (wikilinks like `[[2026-04-02 Technomic Weekly Status Meeting]]`). Read each meeting note's frontmatter to extract the `participants:` list.
 
@@ -363,16 +364,39 @@ After project updates, enrich person notes for anyone who appeared in today's me
 
 4. **Update aliases if needed**: If a person was referred to by a name not in their aliases (e.g., transcript says "Bhrugen" but aliases only has "Bhru"), add the new alias.
 
+5. **Update project people lists**: For each project represented by today's linked meeting notes:
+   - Read the project note from `$VAULT/Projects/`.
+   - Find the first existing people-roster section using this heading preference:
+     1. `## People`
+     2. `## Team`
+     3. `## Points of Contact`
+     4. `## Contacts`
+   - If none exists, create `## People` before `## Meetings`, `## Recent Activity`, `## Todos`, `## Related`, or at the end of the note.
+   - Add any meeting participant who has been matched to or created as a `Persons/` note.
+   - Format entries as simple wikilink bullets by default:
+     ```markdown
+     - [[Full Name]]
+     ```
+   - If the person's note has a concise `**Role:**` value or the meeting context makes the role obvious, include lightweight context:
+     ```markdown
+     - [[Full Name]] — client stakeholder
+     ```
+   - Preserve existing manually written notes after the person link. Do not rewrite or remove existing people unless they are exact duplicates.
+   - Deduplicate by canonical person file, not by alias text. Prefer the full `Persons/` filename for the wikilink.
+   - In interactive mode, include the project people-list changes in the Phase 5/6/7 preview before writing. In auto mode, apply directly.
+
 **Rules:**
 - Only process participants from meeting notes linked in today's daily note. Don't scan all meetings in the vault.
 - Use full names from `Persons/` filenames for wikilinks, not the short names from meeting frontmatter.
 - The `## Recent Interactions` section is the enrichment target. Don't modify other sections of person notes.
+- Project people lists are a reverse index of confirmed meeting participants and known project associations. Do not use project people lists as authoritative meeting attendance.
 - Idempotent: running twice should not create duplicate entries or files.
 
 ## Key Rules
 
 - **Never modify time entries automatically** — the bullet list at the top is structured data and should remain stable for time-tracking workflows
 - **Todos live on project pages** — open todos are under `## Todos` in each project file. Daily notes show them via dataview queries (`### Done today` for completed, `### Open todos` for unchecked).
+- **People lists live on project pages** — maintain a `## People` roster when no existing `## Team`, `## Points of Contact`, or `## Contacts` section exists. Treat it as a project relationship index, not proof of attendance for a specific meeting.
 - **Link known entities freely** — no need to ask for entities that already exist
 - **Offer to create unknown entities** — ask before creating new vault pages
 - **Author's voice** — improve clarity without rewriting style
