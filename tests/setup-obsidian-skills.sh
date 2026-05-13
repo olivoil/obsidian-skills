@@ -38,6 +38,8 @@ grep -q 'CUSTOM PROJECT MAP' "$TARGET/.cache/om/intervals-cache/project-mappings
 bash "$SKILL_DIR/scripts/bootstrap-cache.sh" "$TARGET" --reset-cache
 grep -q '# Project Mappings' "$TARGET/.cache/om/intervals-cache/project-mappings.md"
 
-bash -n "$SKILL_DIR/scripts/bootstrap-cache.sh" "$SKILL_DIR/scripts/migrate-state.sh"
+for script in "$SKILL_DIR/scripts/bootstrap-cache.sh" "$SKILL_DIR/scripts/migrate-state.sh"; do
+  bash -n "$script"
+done
 
 echo "setup obsidian skills passed"
